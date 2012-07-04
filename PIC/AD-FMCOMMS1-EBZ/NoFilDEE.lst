@@ -1,0 +1,107 @@
+MPASM  5.45                      NOFILDEE.ASM   7-3-2012  12:04:45         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;*************************************************************************
+                      00002 ;* Software License Agreement
+                      00003 ;*
+                      00004 ;* Copyright © 2007 Microchip Technology Inc.  All rights reserved.
+                      00005 ;*
+                      00006 ;* Microchip licenses to you the right to use, modify, copy and distribute 
+                      00007 ;* Software only when embedded on a Microchip microcontroller or digital 
+                      00008 ;* signal controller, which is integrated into your product or third party 
+                      00009 ;* product (pursuant to the sublicense terms in the accompanying license 
+                      00010 ;* agreement).  
+                      00011 ;*
+                      00012 ;* You should refer to the license agreement accompanying this Software for 
+                      00013 ;* additional information regarding your rights and obligations.
+                      00014 ;*
+                      00015 ;* SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY 
+                      00016 ;* KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
+                      00017 ;* WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
+                      00018 ;* PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
+                      00019 ;* LIABLE OR OBLIGATED UNDER CONTRACT, NEGLIGENCE, STRICT LIABILITY, 
+                      00020 ;* CONTRIBUTION, BREACH OF WARRANTY, OR OTHER LEGAL EQUITABLE THEORY ANY 
+                      00021 ;* DIRECT OR INDIRECT DAMAGES OR EXPENSES INCLUDING BUT NOT LIMITED TO ANY 
+                      00022 ;* INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR CONSEQUENTIAL DAMAGES, LOST 
+                      00023 ;* PROFITS OR LOST DATA, COST OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY, 
+                      00024 ;* SERVICES, OR ANY CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO 
+                      00025 ;* ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+                      00026 ;*
+                      00027 ;* Author        Date        Comment
+                      00028 ;*************************************************************************
+                      00029 ;* S. Cowden    2007/05/24  Version 1.0.0 - Initial Release
+                      00030 ;*************************************************************************
+                      00031 
+                      00032 
+                      00033 #include "NoFilDEE.inc"
+                      00001 
+                      00002 #define EMULATION_PAGES_START_ADDRESS        0x01C00
+                      00003 
+                      00004 #define DATA_EE_BANKS                        2
+                      00005 #define NUM_DATA_EE_PAGES                    2
+                      00006 #define DATA_EE_SIZE                         255
+                      00007 #define ERASE_WRITE_CYCLE_MAX                1000
+                      00008 #define NUMBER_OF_INSTRUCTION_IN_ROW         64
+                      00009 #define NUMBER_OF_INSTRUCTIONS_IN_PAGE       256
+                      00010 
+                      00011 #define ERASE                                0x14
+                      00012 #define PROGRAM_ROW                          0x04
+                      00013 #define PROGRAM_WORD                         0x24
+                      00034 
+                      00035 
+                      00036         list r = dec
+                      00037 
+                      00038 Emulation_PageSCN       CODE    EMULATION_PAGES_START_ADDRESS
+001C00 FFFF FFFF FFFF 00039 Emulation_Page          RES     DATA_EE_BANKS * NUM_DATA_EE_PAGES * (NUMBER_OF_INSTRUCTIONS_IN_PAGE*2)
+       FFFF FFFF FFFF 
+MPASM  5.45                      NOFILDEE.ASM   7-3-2012  12:04:45         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFFF FFFF 
+       FFFF FFF
+  0000                00040                         GLOBAL  Emulation_Page
+                      00041 
+                      00042         END
+MPASM  5.45                      NOFILDEE.ASM   7-3-2012  12:04:45         PAGE  3
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+DATA_EE_BANKS                     2
+DATA_EE_SIZE                      255
+EMULATION_PAGES_START_ADDRESS     0x01C00
+ERASE                             0x14
+ERASE_WRITE_CYCLE_MAX             1000
+Emulation_Page                    00001C00
+NUMBER_OF_INSTRUCTIONS_IN_PAGE    256
+NUMBER_OF_INSTRUCTION_IN_ROW      64
+NUM_DATA_EE_PAGES                 2
+PROGRAM_ROW                       0x04
+PROGRAM_WORD                      0x24
+__18F24J50                        00000001
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+
