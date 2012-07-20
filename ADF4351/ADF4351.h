@@ -117,6 +117,7 @@
 #define ADF4351_MAX_BANDSEL_CLK		125000 /* Hz */
 #define ADF4351_MAX_FREQ_REFIN		250000000 /* Hz */
 #define ADF4351_MAX_MODULUS			4095
+#define ADF4351_MAX_R_CNT			1023
 
 /******************************************************************************/
 /************************ Types Definitions ***********************************/
