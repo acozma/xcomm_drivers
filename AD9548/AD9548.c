@@ -43,11 +43,13 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include <stdint.h>
 #include "spi_interface.h"
 #include "AD9548.h"
 #include "AD9548_cfg.h"
 
+/******************************************************************************/
+/************************ Local variables and types ***************************/
+/******************************************************************************/
 struct ad9548_state 
 {
     struct ad9548_platform_data *pdata;
@@ -67,10 +69,10 @@ enum ad9548_raw_masks
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int ad9548_write(unsigned short registerAddress,
-				 unsigned char registerValue)
+int32_t ad9548_write(uint16_t registerAddress,
+				     uint8_t registerValue)
 {
-	unsigned short regAddr = 0;
+	uint16_t regAddr = 0;
 
 	regAddr = (registerAddress & 0x1FFF);
 	return SPI_Write(SPI_SEL_AD9548, regAddr, registerValue);
@@ -83,16 +85,16 @@ int ad9548_write(unsigned short registerAddress,
  *
  * @return registerValue - The register's value or negative error code.
 *******************************************************************************/
-int ad9548_read(unsigned short registerAddress)
+int32_t ad9548_read(uint16_t registerAddress)
 {
-	unsigned short	regAddr = 0;
-	unsigned long	registerValue = 0;
-	int ret;
+	uint16_t	regAddr = 0;
+	uint32_t	registerValue = 0;
+	int32_t ret;
 
 	regAddr = 0x8000 + (registerAddress & 0x1FFF);
 	ret = SPI_Read(SPI_SEL_AD9548, regAddr, &registerValue);
 
-	return (ret < 0 ? ret : (int)registerValue);
+	return (ret < 0 ? ret : (int32_t)registerValue);
 }
 
 /***************************************************************************//**
@@ -102,7 +104,7 @@ int ad9548_read(unsigned short registerAddress)
 *******************************************************************************/
 int32_t ad9548_update_io()
 {
-	int ret;
+	int32_t ret;
 
 	ret = ad9548_write(AD9548_REG_IO_UPDATE, 0x01);
 	if(ret < 0)
@@ -123,13 +125,13 @@ int32_t ad9548_update_io()
  *
  * @return Returns 0 in case of success or negative error code
 *******************************************************************************/
-int ad9548_read_raw(int channel,
-                    int *val,
-                    int *val2,
-                    long m)
+int32_t ad9548_read_raw(int32_t channel,
+                    int32_t *val,
+                    int32_t *val2,
+                    int32_t m)
 {
 	struct ad9548_state *st = &ad9548_st;
-	int ret, distr_settings, div = 0;
+	int32_t ret, distr_settings, div = 0;
 
 	distr_settings = ad9548_read(AD9548_REG_DISTRIBUTION_SETTINGS);
 	if (distr_settings < 0)
@@ -181,14 +183,14 @@ int ad9548_read_raw(int channel,
  *
  * @return Returns 0 in case of success or negative error code
 *******************************************************************************/
-int ad9548_write_raw(int channel,
-                     int val,
-                     int val2,
-                     long mask)
+int32_t ad9548_write_raw(int32_t channel,
+                     int32_t val,
+                     int32_t val2,
+                     int32_t mask)
 {
 	struct ad9548_state *st = &ad9548_st;
-	unsigned reg;
-	int ret, tmp;
+	uint32_t reg;
+	int32_t ret, tmp;
 
 	ret = ad9548_read(AD9548_REG_DISTRIBUTION_SETTINGS);
 	if (ret < 0)
@@ -246,18 +248,25 @@ out:
  *
  * @return Returns the actual set frequency or negative error code
 *******************************************************************************/
-int64_t ad9548_out_frequency(int channel, int64_t Hz)
+int64_t ad9548_out_frequency(int32_t channel, int64_t Hz)
 {
-    int ret;
-    int ret_freq;
+    int32_t ret;
+    int32_t ret_freq;
 
-    ret = ad9548_write_raw(channel, Hz, 0, CHAN_INFO_FREQUENCY);
-    if(ret < 0)
-        return ret;
+    if(Hz != INT64_MAX)
+    {
+        ret = ad9548_write_raw(channel, (int32_t)Hz, 0, CHAN_INFO_FREQUENCY);
+        if(ret < 0)
+            return ret;
 
-    ret = ad9548_read_raw(channel, &ret_freq, NULL, CHAN_INFO_FREQUENCY);
-    if(ret < 0)
-        return ret;
+        ret_freq = (int32_t)Hz;
+    }
+    else
+    {
+        ret = ad9548_read_raw(channel, &ret_freq, 0, CHAN_INFO_FREQUENCY);
+        if(ret < 0)
+            return ret;
+    }
 
     return (int64_t)ret_freq;
 }
@@ -317,7 +326,7 @@ int64_t ad9548_out_altvoltage3_frequency(int64_t Hz)
 *******************************************************************************/
 int32_t ad9548_sync_dividers()
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9548_write(AD9548_REG_CAL_SYNC, 0x02);
     if(ret < 0)
@@ -343,7 +352,7 @@ int32_t ad9548_sync_dividers()
 *******************************************************************************/
 int32_t ad9548_calibrate_sys_clk()
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9548_write(AD9548_REG_CAL_SYNC, 0x01);
     if(ret < 0)
@@ -375,7 +384,7 @@ int32_t ad9548_calibrate_sys_clk()
 *******************************************************************************/
 int32_t general_pwd(int32_t en, int32_t bit)
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9548_read(AD9548_REG_GENERAL_POWER_DOWN);
     if(ret < 0)
@@ -485,7 +494,7 @@ int32_t ad9548_full_pwd(int32_t en)
 *******************************************************************************/
 int32_t ad9548_sys_clk_stable()
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9548_read(AD9548_REG_SYSTEM_CLOCK);
     if(ret < 0)
@@ -499,7 +508,7 @@ int32_t ad9548_sys_clk_stable()
 *******************************************************************************/
 int32_t ad9548_sys_clk_pll_locked()
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9548_read(AD9548_REG_SYSTEM_CLOCK);
     if(ret < 0)
@@ -513,7 +522,7 @@ int32_t ad9548_sys_clk_pll_locked()
 *******************************************************************************/
 int32_t ad9548_dpll_phase_locked()
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9548_read(AD9548_REG_IRQ_MONITOR_2);
     if(ret < 0)
@@ -527,7 +536,7 @@ int32_t ad9548_dpll_phase_locked()
 *******************************************************************************/
 int32_t ad9548_dpll_frequency_locked()
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9548_read(AD9548_REG_IRQ_MONITOR_2);
     if(ret < 0)
@@ -545,7 +554,7 @@ int32_t ad9548_dpll_frequency_locked()
 *******************************************************************************/
 int32_t ad9548_ref_state(int32_t ref_no)
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9548_read(AD9548_REG_IRQ_MONITOR_4 + ref_no/2);
     if(ret < 0)
@@ -629,9 +638,9 @@ int32_t ad9548_setup(void)
 {
     struct ad9548_state *st = &ad9548_st;
     struct ad9548_platform_data *pdata = &ad9548_pdata_lpc;
-	int ret, i, ref_pwd; 
-    int ref_logic0, ref_logic1;
-    int distr_settings, distr_en, distr_sync;
+	int32_t ret, i, ref_pwd; 
+    int32_t ref_logic0, ref_logic1;
+    int32_t distr_settings, distr_en, distr_sync;
 	
     st->pdata = &ad9548_pdata_lpc;
 
@@ -799,7 +808,7 @@ int32_t ad9548_setup(void)
     if(ret < 0)
         return ret;	
 	
-    ret = ad9548_write(AD9548_REG_HISTORY_MODE, pdata->dpll_history_mode);
+    ret = ad9548_write(AD9548_REG_HISTORY_MODE, (uint8_t)pdata->dpll_history_mode);
     if(ret < 0)
         return ret;		
     
@@ -811,11 +820,11 @@ int32_t ad9548_setup(void)
     if(ret < 0)
         return ret;
 
-	ret = ad9548_write(AD9548_REG_DISTRIBUTION_SYNCRONIZATION, pdata->clock_distr_sync_source);
+	ret = ad9548_write(AD9548_REG_DISTRIBUTION_SYNCRONIZATION, (uint8_t)pdata->clock_distr_sync_source);
     if(ret < 0)
         return ret;
 
-	ret = ad9548_write(AD9548_REG_AUTOMATIC_SYNCRONIZATION, pdata->clock_distr_automatic_sync_mode);
+	ret = ad9548_write(AD9548_REG_AUTOMATIC_SYNCRONIZATION,  (uint8_t)pdata->clock_distr_automatic_sync_mode);
     if(ret < 0)
         return ret;
 	

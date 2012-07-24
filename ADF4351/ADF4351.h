@@ -124,32 +124,32 @@
 /******************************************************************************/
 struct adf4351_platform_data 
 {
-	unsigned long		clkin;
-	unsigned long		channel_spacing;
-	unsigned long long	power_up_frequency;
+	uint32_t	clkin;
+	uint32_t	channel_spacing;
+	uint64_t	power_up_frequency;
  
-	unsigned short		ref_div_factor; /* 10-bit R counter */
-	unsigned char	    ref_doubler_en;
-	unsigned char	    ref_div2_en;
+	uint16_t	ref_div_factor; /* 10-bit R counter */
+	uint8_t	    ref_doubler_en;
+	uint8_t	    ref_div2_en;
  
-	unsigned		    r2_user_settings;
-	unsigned		    r3_user_settings;
-	unsigned		    r4_user_settings;
-	int			        gpio_lock_detect;
+	uint32_t    r2_user_settings;
+	uint32_t    r3_user_settings;
+	uint32_t    r4_user_settings;
+	int32_t	    gpio_lock_detect;
 };
 
 /******************************************************************************/
 /************************ Functions Declarations ******************************/
 /******************************************************************************/
 /** Initializes the ADF4351. */
-int32_t adf4351_setup(char channel);
+int32_t adf4351_setup(int8_t channel);
 /** Stores PLL 0 frequency in Hz. */
-int64_t adf4351_out_altvoltage0_frequency(int64_t Hz, char channel);
+int64_t adf4351_out_altvoltage0_frequency(int64_t Hz, int8_t channel);
 /** Stores PLL 0 frequency resolution/channel spacing in Hz. */
-int32_t adf4351_out_altvoltage0_frequency_resolution(int32_t Hz, char channel);
+int32_t adf4351_out_altvoltage0_frequency_resolution(int32_t Hz, int8_t channel);
 /** Sets PLL 0 REFin frequency in Hz. */
-int64_t adf4351_out_altvoltage0_refin_frequency(int64_t Hz, char channel);
+int64_t adf4351_out_altvoltage0_refin_frequency(int64_t Hz, int8_t channel);
 /** Powers down the PLL.  */
-int32_t adf351_out_altvoltage0_powerdown(int32_t pwd, char channel);
+int32_t adf351_out_altvoltage0_powerdown(int32_t pwd, int8_t channel);
 
 #endif // __ADF4351_H__

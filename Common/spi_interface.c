@@ -44,9 +44,7 @@
 /*****************************************************************************/
 /***************************** Include Files *********************************/
 /*****************************************************************************/
-#include <stdint.h>
 #include "xparameters.h"
-#include "xil_io.h"
 #include "i2c.h"
 #include "spi_interface.h"
 
@@ -122,11 +120,11 @@ static const stDevConfig devConfig[] =
 *
 * @return None
 ******************************************************************************/
-void PIC_Config(u32 spiSel, u32 rxCnt, u8 csState)
+void PIC_Config(uint32_t spiSel, uint32_t rxCnt, uint8_t csState)
 {
-    u8 wrSize;
-    u8 wrBuf[8];
-    u32 spiConfig = devConfig[spiSel].spiConfig;
+    uint8_t wrSize;
+    uint8_t wrBuf[8];
+    uint32_t spiConfig = devConfig[spiSel].spiConfig;
 
     /* Add to the SPI configuration the Rx size and the CS state */
     spiConfig += SPI_RX_TRANSFER_CNT(rxCnt);
@@ -153,10 +151,10 @@ void PIC_Config(u32 spiSel, u32 rxCnt, u8 csState)
 *
 * @return Returns the number of written bytes
 ******************************************************************************/
-u32 PIC_Write(u32 spiSel, u8 size, u32 data)
+uint32_t PIC_Write(uint32_t spiSel, uint8_t size, uint32_t data)
 {
-    u8 wrSize;
-    u8 wrBuf[8];
+    uint8_t wrSize;
+    uint8_t wrBuf[8];
    
     /* Build the write buffer */
     wrSize = size + 1;    
@@ -181,11 +179,11 @@ u32 PIC_Write(u32 spiSel, u8 size, u32 data)
 *
 * @return Returns the number of bytes read from the device
 ******************************************************************************/
-u32 PIC_Read(u32 spiSel, u8 size, u32* data)
+uint32_t PIC_Read(uint32_t spiSel, uint8_t size, uint32_t* data)
 {
-    int i = 0;
-    u32 rSize = size;
-    u8 rdBuf[8];
+    int32_t i = 0;
+    uint32_t rSize = size;
+    uint8_t rdBuf[8];
 
     /* Read data from the  PIC */
     rSize = I2C_Read(XPAR_AXI_IIC_0_BASEADDR, IICSEL_PIC, -1, size, rdBuf);
@@ -207,7 +205,7 @@ u32 PIC_Read(u32 spiSel, u8 size, u32* data)
 ******************************************************************************/
 int SPI_Init()
 {
-	unsigned char wrBuf[1] = {0x02};
+	uint8_t wrBuf[1] = {0x02};
 
 	int ret = I2C_Write(XPAR_AXI_IIC_0_BASEADDR, IICSEL_PIC, -1,
 						sizeof(wrBuf)/sizeof(unsigned char), wrBuf);
@@ -223,10 +221,10 @@ int SPI_Init()
 *
 * @return Returns -1 in case of error, 0 for success
 ******************************************************************************/
-int SPI_Read(u32 spiSel, u32 regAddr, u32* data) 
+int SPI_Read(uint32_t spiSel, uint32_t regAddr, uint32_t* data) 
 {
-    u32 addr;
-    u32 rSize;
+    uint32_t addr;
+    uint32_t rSize;
 
     /* Write the address */
     if (devConfig[spiSel].addrWidth) 
@@ -255,10 +253,10 @@ int SPI_Read(u32 spiSel, u32 regAddr, u32* data)
 *
 * @return Returns -1 in case of error, 0 for success
 ******************************************************************************/
-int SPI_Write(u32 spiSel, u32 regAddr, u32 data) 
+int SPI_Write(uint32_t spiSel, uint32_t regAddr, uint32_t data) 
 {
-    u32 wData;
-    u32 wSize;
+    uint32_t wData;
+    uint32_t wSize;
 
     wData = (regAddr << devConfig[spiSel].dataWidth) | data;
 

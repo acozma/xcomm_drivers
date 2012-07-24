@@ -43,7 +43,6 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include <stdint.h>
 #include "spi_interface.h"
 #include "AD9643.h"
 
@@ -55,7 +54,7 @@
 *
 * @return Returns 0 in case of success or negative error code
 ******************************************************************************/
-int ad9643_write(unsigned int regAddr, unsigned int regVal)
+int32_t ad9643_write(uint32_t regAddr, uint32_t regVal)
 {
     return SPI_Write(SPI_SEL_AD9643, regAddr, regVal);
 }
@@ -67,15 +66,15 @@ int ad9643_write(unsigned int regAddr, unsigned int regVal)
 *
 * @return Returns the read data or negative error code
 ******************************************************************************/
-int ad9643_read(unsigned int regAddr)
+int32_t ad9643_read(uint32_t regAddr)
 {
-	int ret;
-	unsigned long data;
+	int32_t ret;
+	uint32_t data;
 
 	regAddr += 0x8000;
     ret = SPI_Read(SPI_SEL_AD9643, regAddr, &data);
 
-    return (ret < 0 ? ret : (int)data);
+    return (ret < 0 ? ret : (int32_t)data);
 }
 
 /***************************************************************************//**
@@ -107,17 +106,32 @@ int32_t ad9643_setup()
 *******************************************************************************/
 int32_t ad9643_ext_pwd_pin_fnc(int32_t fnc)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (fnc == 0) | (fnc == 1) )
 	{
 		regValue = ad9643_read(AD9643_REG_PWR_MODES);
-		regValue &= ~AD9643_PWR_MODES_EXT_PWR_DOWN_PIN_FNC;
+		if(regValue < 0)
+            return regValue;
+
+        regValue &= ~AD9643_PWR_MODES_EXT_PWR_DOWN_PIN_FNC;
 		regValue |= (fnc * AD9643_PWR_MODES_EXT_PWR_DOWN_PIN_FNC);
+        
+        ret = ad9643_write(AD9643_REG_PWR_MODES, regValue);
+        if(ret < 0)
+            return ret;
 	}
-	
-	return (ad9643_read(AD9643_REG_PWR_MODES) &
-			AD9643_PWR_MODES_EXT_PWR_DOWN_PIN_FNC);
+    else
+    {
+        ret = ad9643_read(AD9643_REG_PWR_MODES);
+        if(ret < 0)
+            return ret;
+
+        fnc = (ret & AD9643_PWR_MODES_EXT_PWR_DOWN_PIN_FNC) != 0;
+    }
+
+    return fnc;
 }
 
 /***************************************************************************//**
@@ -133,19 +147,36 @@ int32_t ad9643_ext_pwd_pin_fnc(int32_t fnc)
 *******************************************************************************/
 int32_t ad9643_pwd_mode(int32_t mode)
 {
-	unsigned char regValue = 0;
+    int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (mode == 0) | (mode == 1) | (mode == 2) )
 	{
 		regValue = ad9643_read(AD9643_REG_PWR_MODES);
+        if(regValue < 0)
+            return regValue;
+
 		regValue &= ~AD9643_PWR_MODES_INT_PWR_DOWN_MODE(0x3);
 		regValue |= AD9643_PWR_MODES_INT_PWR_DOWN_MODE(mode);
-		ad9643_write(AD9643_REG_PWR_MODES, regValue);
+		
+        ret = ad9643_write(AD9643_REG_PWR_MODES, regValue);
+        if(ret < 0)
+            return ret;
+
         ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
 	}
-	
-	return (ad9643_read(AD9643_REG_PWR_MODES) &
-			            AD9643_PWR_MODES_INT_PWR_DOWN_MODE(0x3));
+    else
+    {
+        ret = ad9643_read(AD9643_REG_PWR_MODES);
+        if(ret < 0)
+            return ret;
+
+        mode = (ret & AD9643_PWR_MODES_INT_PWR_DOWN_MODE(0x3));
+    }
+
+    return mode;
 }
 
 /***************************************************************************//**
@@ -164,14 +195,18 @@ int32_t ad9643_clock_duty_cycle_stabilizer(int32_t en)
 		ad9643_write(AD9643_REG_GLOBAL_CLK, 0x00);
         ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
 	}
-	if(en == 1)
+	else if(en == 1)
 	{
 		ad9643_write(AD9643_REG_GLOBAL_CLK,
 					 AD9643_GLOBAL_CLK_DUTY_CYCLE_STABILIZER_EN);
         ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
 	}
-	
-	return ad9643_read(AD9643_REG_GLOBAL_CLK);
+    else
+    {
+	    en = ad9643_read(AD9643_REG_GLOBAL_CLK);
+    }
+
+    return en;
 }
 
 /***************************************************************************//**
@@ -192,19 +227,36 @@ int32_t ad9643_clock_duty_cycle_stabilizer(int32_t en)
 *******************************************************************************/
 int32_t ad9643_clock_divide_ratio(int32_t ratio)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (ratio >= 0) & (ratio <= 7) )
 	{
 		regValue = ad9643_read(AD9643_REG_CLK_DIV);
+        if(regValue < 0)
+            return regValue;
+
 		regValue &= ~AD9643_CLK_DIV_RATIO(0x7);
 		regValue |= AD9643_CLK_DIV_RATIO(ratio);
-		ad9643_write(AD9643_REG_CLK_DIV, regValue);
+
+		ret = ad9643_write(AD9643_REG_CLK_DIV, regValue);
+        if(ret < 0)
+            return ret;
+
         ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
 	}
-	
-	return (ad9643_read(AD9643_REG_CLK_DIV) &
-			            AD9643_CLK_DIV_RATIO(0x7));
+    else
+    {
+	    ret = ad9643_read(AD9643_REG_CLK_DIV);
+        if(ret < 0)
+            return ret;
+        
+        ratio = ret & AD9643_CLK_DIV_RATIO(0x7);
+    }
+
+    return ratio;
 }
 
 /***************************************************************************//**
@@ -224,19 +276,35 @@ int32_t ad9643_clock_divide_ratio(int32_t ratio)
 *******************************************************************************/
 int32_t ad9643_clock_phase_adj(int32_t adj)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (adj >= 0) & (adj <= 7) )
 	{
 		regValue = ad9643_read(AD9643_REG_CLK_DIV);
+        if(regValue < 0)
+            return regValue;
+
 		regValue &= ~AD9643_CLK_IN_CLK_DIV_PHASE_ADJ(0x7);
 		regValue |= AD9643_CLK_IN_CLK_DIV_PHASE_ADJ(adj);
-		ad9643_write(AD9643_REG_CLK_DIV, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+
+		ret = ad9643_write(AD9643_REG_CLK_DIV, regValue);
+        if(ret < 0)
+            return ret;
+
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
 	}
-	
-	return (ad9643_read(AD9643_REG_CLK_DIV) &
-			AD9643_CLK_IN_CLK_DIV_PHASE_ADJ(0x7));
+	else
+	{
+		ret = ad9643_read(AD9643_REG_CLK_DIV);
+		if(ret < 0)
+            return ret;
+			
+		adj = ret & AD9643_CLK_IN_CLK_DIV_PHASE_ADJ(0x7);
+	}
+	return adj;
 }
 
 /***************************************************************************//**
@@ -248,22 +316,33 @@ int32_t ad9643_clock_phase_adj(int32_t adj)
 *******************************************************************************/
 int32_t ad9643_offset_adj(int32_t adj)
 {
-	unsigned char regValue = 0;
-	unsigned char twosComplementOffset = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
+	uint8_t twosComplementOffset = 0;
 	
 	if( (adj >= -32) & (adj <= 31) )
 	{
 		regValue = ad9643_read(AD9643_REG_OFFSET_ADJ);
-		regValue &= ~AD9643_OFFSET_ADJ(0x3F);
+		if(regValue < 0)
+            return regValue;
+        
+        regValue &= ~AD9643_OFFSET_ADJ(0x3F);
 		twosComplementOffset = (adj & 0x3F);
 		regValue |= AD9643_OFFSET_ADJ(twosComplementOffset);
 		
-		ad9643_write(AD9643_REG_OFFSET_ADJ, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		ret = ad9643_write(AD9643_REG_OFFSET_ADJ, regValue);
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+	}
+	else
+	{
+		ret = ad9643_read(AD9643_REG_OFFSET_ADJ);
+		if(ret < 0)
+            return ret;
+			
+		adj = ret & AD9643_OFFSET_ADJ(0x3F);
 	}
 	
-	return (ad9643_read(AD9643_REG_OFFSET_ADJ) &
-			            AD9643_OFFSET_ADJ(0x3F));
+	return adj;
 }
 
 /***************************************************************************//**
@@ -277,19 +356,35 @@ int32_t ad9643_offset_adj(int32_t adj)
 *******************************************************************************/
 int32_t ad9643_output_enable(int32_t en)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (en == 0) | (en == 1))
 	{
 		regValue = ad9643_read(AD9643_REG_OUTPUT_MODE);
-		regValue &= ~AD9643_OUTPUT_MODE_OUTPUT_EN;
+		if(regValue < 0)
+            return regValue;
+        
+        regValue &= ~AD9643_OUTPUT_MODE_OUTPUT_EN;
 		regValue |= (en * AD9643_OUTPUT_MODE_OUTPUT_EN);
-		ad9643_write(AD9643_REG_OUTPUT_MODE, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		
+        ret = ad9643_write(AD9643_REG_OUTPUT_MODE, regValue);
+        if(ret < 0)
+            return ret;
+
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
 	}
-	
-	return (ad9643_read(AD9643_REG_OUTPUT_MODE) &
-			            AD9643_OUTPUT_MODE_OUTPUT_EN);
+	else
+	{
+		ret = ad9643_read(AD9643_REG_OUTPUT_MODE);
+		if(ret < 0)
+            return ret;
+			
+		en = (ret & AD9643_OUTPUT_MODE_OUTPUT_EN) != 0;
+	}
+	return en;
 }
 
 /***************************************************************************//**
@@ -303,19 +398,36 @@ int32_t ad9643_output_enable(int32_t en)
 *******************************************************************************/
 int32_t ad9643_output_invert(int32_t invert)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (invert == 0) | (invert == 1))
 	{
 		regValue = ad9643_read(AD9643_REG_OUTPUT_MODE);
-		regValue &= ~AD9643_OUTPUT_MODE_OUTPUT_INVERT;
+		if(regValue < 0)
+            return regValue;
+        
+        regValue &= ~AD9643_OUTPUT_MODE_OUTPUT_INVERT;
 		regValue |= (invert * AD9643_OUTPUT_MODE_OUTPUT_INVERT);
-		ad9643_write(AD9643_REG_OUTPUT_MODE, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		
+        ret = ad9643_write(AD9643_REG_OUTPUT_MODE, regValue);
+        if(ret < 0)
+            return ret;
+
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
+	}
+	else
+	{
+		ret = ad9643_read(AD9643_REG_OUTPUT_MODE);
+		if(ret < 0)
+            return ret;
+		
+		invert = (ret & AD9643_OUTPUT_MODE_OUTPUT_INVERT) != 0;
 	}
 	
-	return (ad9643_read(AD9643_REG_OUTPUT_MODE) &
-			            AD9643_OUTPUT_MODE_OUTPUT_INVERT);
+	return invert;
 }
 
 /***************************************************************************//**
@@ -331,19 +443,36 @@ int32_t ad9643_output_invert(int32_t invert)
 *******************************************************************************/
 int32_t ad9643_output_format(int32_t format)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (format == 0) | (format == 1) | (format == 2) )
 	{
 		regValue = ad9643_read(AD9643_REG_OUTPUT_MODE);
-		regValue &= ~AD9643_OUTPUT_MODE_OUTPUT_FORMAT(0x3);
+		if(regValue < 0)
+            return regValue;
+        
+        regValue &= ~AD9643_OUTPUT_MODE_OUTPUT_FORMAT(0x3);
 		regValue |= AD9643_OUTPUT_MODE_OUTPUT_FORMAT(format);
-		ad9643_write(AD9643_REG_OUTPUT_MODE, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		
+        ret = ad9643_write(AD9643_REG_OUTPUT_MODE, regValue);
+        if(ret < 0)
+            return ret;
+
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
+	}
+	else
+	{
+		ret = ad9643_read(AD9643_REG_OUTPUT_MODE);		
+		if(ret < 0)
+            return ret;
+		
+		format = ret & AD9643_OUTPUT_MODE_OUTPUT_FORMAT(0x3);
 	}
 	
-	return (ad9643_read(AD9643_REG_OUTPUT_MODE) &
-			            AD9643_OUTPUT_MODE_OUTPUT_FORMAT(0x3));
+	return format;
 }
 
 /***************************************************************************//**
@@ -364,19 +493,36 @@ int32_t ad9643_output_format(int32_t format)
 *******************************************************************************/
 int32_t ad9643_output_current_adj(int32_t adj)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (adj >= 0) & (adj <= 7) )
 	{
 		regValue = ad9643_read(AD9643_REG_OUTPUT_ADJ);
-		regValue &= ~AD9643_REG_OUTPUT_ADJ_VAL(0xF);
+		if(regValue < 0)
+            return regValue;
+        
+        regValue &= ~AD9643_REG_OUTPUT_ADJ_VAL(0xF);
 		regValue |= AD9643_REG_OUTPUT_ADJ_VAL(adj);
-		ad9643_write(AD9643_REG_OUTPUT_ADJ, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		
+        ret = ad9643_write(AD9643_REG_OUTPUT_ADJ, regValue);
+        if(ret < 0)
+            return ret;
+
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
+	}
+	else
+	{
+		ret = ad9643_read(AD9643_REG_OUTPUT_ADJ);
+		if(ret < 0)
+            return ret;
+		
+		adj = AD9643_REG_OUTPUT_ADJ_VAL(0xF);
 	}
 	
-	return (ad9643_read(AD9643_REG_OUTPUT_ADJ) &
-			            AD9643_REG_OUTPUT_ADJ_VAL(0xF));
+	return adj;
 }
 
 /***************************************************************************//**
@@ -390,19 +536,36 @@ int32_t ad9643_output_current_adj(int32_t adj)
 *******************************************************************************/
 int32_t ad9643_dco_clock_invert(int32_t invert)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (invert == 0) | (invert == 1))
 	{
 		regValue = ad9643_read(AD9643_REG_CLK_PHASE_CTRL);
-		regValue &= ~AD9643_CLK_PHASE_CTRL_INVERT_DCO_CLK;
+		if(regValue < 0)
+            return regValue;
+        
+        regValue &= ~AD9643_CLK_PHASE_CTRL_INVERT_DCO_CLK;
 		regValue |= (invert * AD9643_CLK_PHASE_CTRL_INVERT_DCO_CLK);
-		ad9643_write(AD9643_REG_CLK_PHASE_CTRL, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		
+        ret = ad9643_write(AD9643_REG_CLK_PHASE_CTRL, regValue);
+        if(ret < 0)
+            return ret;
+
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
+	}
+	else
+	{
+		ret = ad9643_read(AD9643_REG_CLK_PHASE_CTRL);
+		if(ret < 0)
+            return ret;
+		
+		invert = (ret & AD9643_CLK_PHASE_CTRL_INVERT_DCO_CLK) != 0;
 	}
 	
-	return (ad9643_read(AD9643_REG_CLK_PHASE_CTRL) &
-			            AD9643_CLK_PHASE_CTRL_INVERT_DCO_CLK);
+	return invert;
 }
 
 /***************************************************************************//**
@@ -416,19 +579,36 @@ int32_t ad9643_dco_clock_invert(int32_t invert)
 *******************************************************************************/
 int32_t ad9643_dco_clock_mode(int32_t mode)
 {
-	unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 	
 	if( (mode == 0) | (mode == 1))
 	{
 		regValue = ad9643_read(AD9643_REG_CLK_PHASE_CTRL);
-		regValue &= ~AD9643_CLK_PHASE_CTRL_MODE;
+		if(regValue < 0)
+            return regValue;
+        
+        regValue &= ~AD9643_CLK_PHASE_CTRL_MODE;
 		regValue |= (mode * AD9643_CLK_PHASE_CTRL_MODE);
-		ad9643_write(AD9643_REG_CLK_PHASE_CTRL, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		
+        ret = ad9643_write(AD9643_REG_CLK_PHASE_CTRL, regValue);
+        if(ret < 0)
+            return ret;
+
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
+	}
+	else
+	{
+		ret = ad9643_read(AD9643_REG_CLK_PHASE_CTRL);
+		if(ret < 0)
+            return ret;
+		
+		mode = (ret & AD9643_CLK_PHASE_CTRL_MODE) != 0;
 	}
 	
-	return (ad9643_read(AD9643_REG_CLK_PHASE_CTRL) &
-			AD9643_CLK_PHASE_CTRL_MODE);
+	return mode;
 }
 
 /***************************************************************************//**
@@ -441,7 +621,7 @@ int32_t ad9643_dco_clock_mode(int32_t mode)
 *******************************************************************************/
 int32_t ad9643_dco_output_clock_delay(int32_t delay)
 {
-	unsigned char regValue = 0;
+    uint8_t regValue = 0;
 	
 	if (!delay) {
 		ad9643_write(AD9643_REG_DCO_OUTPUT_DELAY, 0);
@@ -478,21 +658,38 @@ int32_t ad9643_dco_output_clock_delay(int32_t delay)
 *******************************************************************************/
 int32_t ad9643_input_span(int32_t span)
 {
-	unsigned char regValue = 0;
-	unsigned char twosComplementSpan = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
+	uint8_t twosComplementSpan = 0;
 	
 	if( (span >= -16) & (span <= 15) )
 	{
 		regValue = ad9643_read(AD9643_REG_INPUT_SPAN_SEL);
-		regValue &= ~AD9643_INPUT_SPAN_SEL_FULL_SCALE_VOLTAGE(0x1F);
+		if(regValue < 0)
+            return regValue;
+        
+        regValue &= ~AD9643_INPUT_SPAN_SEL_FULL_SCALE_VOLTAGE(0x1F);
 		twosComplementSpan = (span & 0x1F);
 		regValue |= AD9643_INPUT_SPAN_SEL_FULL_SCALE_VOLTAGE(twosComplementSpan);
-		ad9643_write(AD9643_REG_INPUT_SPAN_SEL, regValue);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		
+        ret = ad9643_write(AD9643_REG_INPUT_SPAN_SEL, regValue);
+        if(ret < 0)
+            return ret;
+
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
+	}
+	else
+	{
+		ret = ad9643_read(AD9643_REG_INPUT_SPAN_SEL);
+		if(ret < 0)
+            return ret;
+		
+		span = ret &  AD9643_INPUT_SPAN_SEL_FULL_SCALE_VOLTAGE(0x1F);
 	}
 	
-	return (ad9643_read(AD9643_REG_INPUT_SPAN_SEL) &
-			            AD9643_INPUT_SPAN_SEL_FULL_SCALE_VOLTAGE(0x1F));
+	return span;
 }
 
 /***************************************************************************//**
@@ -505,11 +702,22 @@ int32_t ad9643_input_span(int32_t span)
 *******************************************************************************/
 int32_t ad9643_test_mode(int32_t mode)
 {
-    if(mode >= AD9643_TEST_MODE_OFF && mode <= AD9643_TEST_MODE_RAMP)
+    int32_t ret;
+	
+	if(mode >= AD9643_TEST_MODE_OFF && mode <= AD9643_TEST_MODE_RAMP)
     {
-        ad9643_write(AD9643_REG_TEST_MODE, mode);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        ret = ad9643_write(AD9643_REG_TEST_MODE, mode);
+		if(ret < 0)
+            return ret;
+			
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		if(ret < 0)
+            return ret;
     }
-
-    return  ad9643_read(AD9643_REG_TEST_MODE);
+	else
+	{
+		mode = ad9643_read(AD9643_REG_TEST_MODE);
+	}
+    
+	return  mode;
 }

@@ -43,25 +43,27 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include <stdint.h>
 #include "spi_interface.h"
 #include "ADF4351.h"
 #include "ADF4351_cfg.h"
 
+/******************************************************************************/
+/************************ Local variables and types ***************************/
+/******************************************************************************/
 struct adf4351_state
 {
 	struct adf4351_platform_data	*pdata;
-	unsigned long	clkin;
-	unsigned long	chspc;	/* Channel Spacing */
-	unsigned long	fpfd;	/* Phase Frequency Detector */
-	unsigned long	min_out_freq;
-	unsigned		r0_fract;
-	unsigned		r0_int;
-	unsigned		r1_mod;
-	unsigned		r4_rf_div_sel;
-	unsigned long	regs[6];
-	unsigned long	regs_hw[6];
-	unsigned long 	val;
+	uint32_t	clkin;
+	uint32_t	chspc;	/* Channel Spacing */
+	uint32_t	fpfd;	/* Phase Frequency Detector */
+	uint32_t	min_out_freq;
+	uint32_t	r0_fract;
+	uint32_t	r0_int;
+	uint32_t	r1_mod;
+	uint32_t	r4_rf_div_sel;
+	uint32_t	regs[6];
+	uint32_t	regs_hw[6];
+	uint32_t 	val;
 }adf4351_st[2];
 
 /***************************************************************************//**
@@ -72,8 +74,8 @@ struct adf4351_state
  *
  * @return Returns 0 in case of success or negative error code..
 *******************************************************************************/
-int adf4351_write(unsigned long data,
-				  char channel)
+int32_t adf4351_write(uint32_t data,
+				      int8_t channel)
 {
 	return SPI_Write(channel ? SPI_SEL_ADF4351_RX : SPI_SEL_ADF4351_TX, 0, data);
 }
@@ -86,10 +88,10 @@ int adf4351_write(unsigned long data,
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int adf4351_sync_config(struct adf4351_state *st,
-						char channel)
+int32_t adf4351_sync_config(struct adf4351_state *st,
+						    int8_t channel)
 {
-	int ret, i, doublebuf = 0;
+	int32_t ret, i, doublebuf = 0;
 
 	for (i = ADF4351_REG5; i >= ADF4351_REG0; i--) {
 		if ((st->regs_hw[i] != st->regs[i]) ||
@@ -123,7 +125,7 @@ int adf4351_sync_config(struct adf4351_state *st,
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int adf4351_tune_r_cnt(struct adf4351_state *st, unsigned short r_cnt)
+int32_t adf4351_tune_r_cnt(struct adf4351_state *st, uint16_t r_cnt)
 {
 	struct adf4351_platform_data *pdata = st->pdata;
 
@@ -141,9 +143,9 @@ int adf4351_tune_r_cnt(struct adf4351_state *st, unsigned short r_cnt)
  *
  * @return Returns the gcd.
 *******************************************************************************/
-unsigned long gcd(unsigned long x, unsigned long y)
+uint32_t gcd(uint32_t x, uint32_t y)
 {
-	int tmp;
+	int32_t tmp;
 
 	tmp = y > x ? x : y;
 
@@ -165,15 +167,15 @@ unsigned long gcd(unsigned long x, unsigned long y)
  *
  * @return calculatedFrequency - The actual frequency value that was set.
 *******************************************************************************/
-int64_t adf4351_set_freq(struct adf4351_state *st, unsigned long long freq,
+int64_t adf4351_set_freq(struct adf4351_state *st, uint64_t freq,
 							char channel)
 {
 	struct adf4351_platform_data *pdata = st->pdata;
-	u64 tmp;
-	u32 div_gcd, prescaler, chspc;
-	u16 mdiv, r_cnt = 0;
-	u8 band_sel_div;
-	int ret;
+	uint64_t tmp;
+	uint32_t div_gcd, prescaler, chspc;
+	uint16_t mdiv, r_cnt = 0;
+	uint8_t band_sel_div;
+	int32_t ret;
 
 	if ((freq > ADF4351_MAX_OUT_FREQ) || (freq < ADF4351_MIN_OUT_FREQ))
 		return -1;
@@ -216,7 +218,7 @@ int64_t adf4351_set_freq(struct adf4351_state *st, unsigned long long freq,
 		} while (r_cnt == 0);
 
 
-		tmp = freq * (u64)st->r1_mod + (st->fpfd > 1);
+		tmp = freq * (uint64_t)st->r1_mod + (st->fpfd > 1);
 		
 		tmp = (tmp / st->fpfd);	/* Div round closest (n + d/2)/d */
 		
@@ -296,7 +298,7 @@ int64_t adf4351_set_freq(struct adf4351_state *st, unsigned long long freq,
 *******************************************************************************/
 int32_t adf4351_setup(char channel)
 {
-	struct adf4351_state *st = &adf4351_st[(int)channel];
+	struct adf4351_state *st = &adf4351_st[(int32_t)channel];
 	st->pdata = &adf4351_pdata_lpc;
 
 	adf4351_out_altvoltage0_refin_frequency(st->pdata->clkin, channel);
@@ -329,7 +331,7 @@ int32_t adf4351_setup(char channel)
 *******************************************************************************/
 int64_t adf4351_out_altvoltage0_frequency(int64_t Hz, char channel)
 {
-	return adf4351_set_freq(&adf4351_st[(int)channel], Hz, channel);
+	return adf4351_set_freq(&adf4351_st[(int32_t)channel], Hz, channel);
 }
 
 /***************************************************************************//**
@@ -344,9 +346,9 @@ int32_t adf4351_out_altvoltage0_frequency_resolution(int32_t Hz, char channel)
 {
 	if(Hz != INT32_MAX)
 	{
-		adf4351_st[(int)channel].chspc = Hz;
+		adf4351_st[(int32_t)channel].chspc = Hz;
 	}
-	return adf4351_st[(int)channel].chspc;
+	return adf4351_st[(int32_t)channel].chspc;
 }
 
 /***************************************************************************//**
@@ -360,10 +362,10 @@ int64_t adf4351_out_altvoltage0_refin_frequency(int64_t Hz, char channel)
 {
 	if(Hz != INT32_MAX)
 	{
-		adf4351_st[(int)channel].clkin = Hz;
+		adf4351_st[(int32_t)channel].clkin = Hz;
 	}
 	
-	return adf4351_st[(int)channel].clkin;
+	return adf4351_st[(int32_t)channel].clkin;
 }
 
 /***************************************************************************//**
@@ -378,7 +380,7 @@ int64_t adf4351_out_altvoltage0_refin_frequency(int64_t Hz, char channel)
 *******************************************************************************/
 int32_t adf4351_out_altvoltage0_powerdown(int32_t pwd, char channel)
 {
-	struct adf4351_state *st = &adf4351_st[(int)channel];
+	struct adf4351_state *st = &adf4351_st[(int32_t)channel];
 	
 	if(pwd == 1)
 	{

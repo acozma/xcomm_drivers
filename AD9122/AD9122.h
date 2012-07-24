@@ -42,10 +42,14 @@
 #ifndef __AD9122_H__
 #define __AD9122_H__
 
+/*****************************************************************************/
+/***************************** Include Files *********************************/
+/*****************************************************************************/
+#include <stdint.h>
+
 /******************************************************************************/
 /***************************** AD9122 *****************************************/
 /******************************************************************************/
-
 /* Registers */
 #define AD9122_REG_COMM						0x00
 #define AD9122_REG_POWER_CTRL				0x01
@@ -318,71 +322,71 @@
 /******************************************************************************/
 /************************ Functions Declarations ******************************/
 /******************************************************************************/
-/** Initializes the AD9643.
-     Returns negative error code or 0 in case of success. */
+/** Initializes the AD9643. */
+/*  **Returns negative error code or 0 in case of success. */
 int32_t ad9122_setup();
 
 /** Resets the device. */
 int32_t ad9122_reset();
 
-/** Sets the power state of the I DAC.
-     Returns the set power state. */
+/** Sets the power state of the I DAC. */
+/*  ** Returns the set power state. */
 int32_t ad9122_powerdown_I_DAC(int32_t pd);
 
-/** Sets the power state of the Q DAC.
-     Returns the set power state. */
+/** Sets the power state of the Q DAC. */
+/*  ** Returns the set power state. */
 int32_t ad9122_powerdown_Q_DAC(int32_t pd);
 
-/** Sets the power state of the data receiver.
-     Returns the set power state. */
+/** Sets the power state of the data receiver. */
+/*  ** Returns the set power state. */
 int32_t ad9122_powerdown_DATA_REC(int32_t pd);
 
-/** Sets the power state of the aux DAC.
-     Returns the set power state. */
+/** Sets the power state of the aux DAC. */
+/*  **Returns the set power state. */
 int32_t ad9122_powerdown_AUX_DAC(int32_t pd);
 
-/** Enables (1) or disables (0) the DACCLK duty correction.
-     Returns duty correction state. */
+/** Enables (1) or disables (0) the DACCLK duty correction. */
+/*  **Returns duty correction state. */
 int32_t ad9122_duty_correction_DACCLK (int32_t en);
 
-/** Enables (1) or disables (0) the REFCLK duty correction.
-     Returns duty correction state. */
+/** Enables (1) or disables (0) the REFCLK duty correction. */
+/*  **Returns duty correction state. */
 int32_t ad9122_duty_correction_REFCLK (int32_t en);
 
-/** Enables (1) or disables (0) the DACCLK cross correction.
-     Returns cross correction state. */
+/** Enables (1) or disables (0) the DACCLK cross correction. */
+/*  ** Returns cross correction state. */
 int32_t ad9122_cross_correction_DACCLK (int32_t en);
 
-/** Enables (1) or disables (0) the REFCLK cross correction.
-     Returns cross correction state. */
+/** Enables (1) or disables (0) the REFCLK cross correction. */
+/*  ** Returns cross correction state. */
 int32_t ad9122_cross_correction_REFCLK (int32_t en);
 
-/** Enables (1) or disables (0) the PLL.
-     Returns the enable PLL state. */
+/** Enables (1) or disables (0) the PLL. */
+/*  ** Returns the enable PLL state. */
 int32_t ad9122_pll_enable(int32_t en);
 
-/** Enables (1) or disables (0) the manual selection of the PLL band.
-     Returns the manual enable PLL state. */
+/** Enables (1) or disables (0) the manual selection of the PLL band. */
+/*  ** Returns the manual enable PLL state. */
 int32_t ad9122_pll_manual_enable(int32_t en);
 
-/** Enables (1) or disables (0) the synchronization logic.
-     Returns the enable synchronization logic state. */
+/** Enables (1) or disables (0) the synchronization logic. */
+/*  ** Returns the enable synchronization logic state. */
 int32_t ad9122_sync_enable(int32_t en);
 
-/** Sets the full-scale current for I DAC.
-     Returns the set full-scale current. */
+/** Sets the full-scale current for I DAC. */
+/*  ** Returns the set full-scale current. */
 int32_t ad9122_fs_adj_I_DAC(int32_t fs_adj);
 
-/** Sets the full-scale current for Q DAC.
-     Returns the set full-scale current. */
+/** Sets the full-scale current for Q DAC. */
+/*  ** Returns the set full-scale current. */
 int32_t ad9122_fs_adj_Q_DAC(int32_t fs_adj);
 
-/** Sets the offset of the I DAC.
-     Returns the set offset. */
+/** Sets the offset of the I DAC. */
+/*  ** Returns the set offset. */
 int32_t ad9122_offset_I_DAC(int32_t offset);
 
-/** Sets the offset of the I DAC.
-     Returns the set offset. */
+/** Sets the offset of the I DAC. */
+/*  ** Returns the set offset. */
 int32_t ad9122_offset_Q_DAC(int32_t offset);
 
 /** Returns the status of the PLL lock. */

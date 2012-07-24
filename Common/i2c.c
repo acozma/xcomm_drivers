@@ -57,13 +57,10 @@
 * @param ns_count Number of ms with which the program must be delayed.
 * @return None.
 ******************************************************************************/
-void msleep(u32 ms_count)
+void msleep(uint32_t ms_count)
 {
-	u32 count;
-	for (count = 0; count < ((ms_count * 100000) + 1); count++)
-	{
-	  asm("nop");
-	}
+	uint32_t count;
+	for (count = 0; count < ((ms_count * 100000) + 1); count++);
 }
 
 /**************************************************************************//**
@@ -71,9 +68,9 @@ void msleep(u32 ms_count)
 *
 * @param axiBaseAddr - Microblaze I2C peripheral AXI base address.
 * @param i2cAddr - The address of the I2C slave.
-* @return TRUE.
+* @return Returns 0 or negative error code.
 ******************************************************************************/
-u32	I2C_Init(u32 axiBaseAddr, u32 i2cAddr)
+uint32_t I2C_Init(uint32_t axiBaseAddr, uint32_t i2cAddr)
 {
 	//disable the I2C core
 	Xil_Out32((axiBaseAddr + CR), 0x00);
@@ -84,7 +81,7 @@ u32	I2C_Init(u32 axiBaseAddr, u32 i2cAddr)
 	//enable the I2C core
 	Xil_Out32((axiBaseAddr + CR), 0x01);
 
-	return TRUE;
+	return 0;
 }
 
 /**************************************************************************//**
@@ -98,10 +95,11 @@ u32	I2C_Init(u32 axiBaseAddr, u32 i2cAddr)
 * @param rxBuf - Buffer to store the read data.
 * @return Returns the number of bytes read.
 ******************************************************************************/
-u32 I2C_Read(u32 axiBaseAddr, u32 i2cAddr, u32 regAddr, u32 rxSize, unsigned char* rxBuf)
+uint32_t I2C_Read(uint32_t axiBaseAddr, uint32_t i2cAddr, 
+                  uint32_t regAddr, uint32_t rxSize, uint8_t* rxBuf)
 {
-	u32 rxCnt = 0;
-	u32 timeout = 0xFFFFFF;
+	uint32_t rxCnt = 0;
+	uint32_t timeout = 0xFFFFFF;
 
 	// Reset tx fifo
 	Xil_Out32((axiBaseAddr + CR), 0x002);
@@ -164,10 +162,11 @@ u32 I2C_Read(u32 axiBaseAddr, u32 i2cAddr, u32 regAddr, u32 rxSize, unsigned cha
 * @param txBuf - Buffer to store the data to be transmitted.
 * @return Returns the number of bytes written.
 ******************************************************************************/
-u32 I2C_Write(u32 axiBaseAddr, u32 i2cAddr, u32 regAddr, u32 txSize, unsigned char* txBuf)
+uint32_t I2C_Write(uint32_t axiBaseAddr, uint32_t i2cAddr, 
+                   uint32_t regAddr, uint32_t txSize, uint8_t* txBuf)
 {
-	u32 txCnt = 0;
-	u32 timeout = 0xFFFF;
+	uint32_t txCnt = 0;
+	uint32_t timeout = 0xFFFF;
 
 	// Reset tx fifo
 	Xil_Out32((axiBaseAddr + CR), 0x002);

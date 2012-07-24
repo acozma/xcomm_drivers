@@ -42,10 +42,14 @@
 #ifndef __AD9548_H__
 #define __AD9548_H__
 
+/*****************************************************************************/
+/***************************** Include Files *********************************/
+/*****************************************************************************/
+#include <stdint.h>
+
 /******************************************************************************/
 /************************ AD9548 **********************************************/
 /******************************************************************************/
-
 /* Registers */
 
 /* Serial port control and part identification */
@@ -680,121 +684,121 @@
 /******************************************************************************/
 struct ad9548_reference_profile
 {
-    unsigned char phase_lock_scale;
-    unsigned char promoted_priority;
-    unsigned char selection_priority;
-    unsigned char reference_period;
-    unsigned char nom_reference_period;
-    unsigned short inner_tolerance;
-    unsigned short outer_tolerance;
-    unsigned short validation_timer;
-    unsigned short redetect_timer;
-    unsigned short dpll_alpha0_linear;
-    unsigned short dpll_alpha1_exp;
-    unsigned short dpll_alpha2_exp;
-    unsigned short dpll_alpha3_exp;
-    unsigned short dpll_beta0_linear;
-    unsigned short dpll_beta1_exp;
-    unsigned short dpll_gamma0_linear;
-    unsigned short dpll_gamma1_exp;
-    unsigned short dpll_delta0_linear;
-    unsigned short dpll_delta1_exp;
-    unsigned long r_div;
-    unsigned long s_div;
-    unsigned long u_div;
-    unsigned long v_div;
-    unsigned short phase_lock_threshold;
-    unsigned short phase_lock_fill_rate;
-    unsigned short phase_lock_drain_rate;
-    unsigned short freq_lock_threshold;
-    unsigned short freq_lock_fill_rate;
-    unsigned short freq_lock_drain_rate;
+    uint8_t phase_lock_scale;
+    uint8_t promoted_priority;
+    uint8_t selection_priority;
+    uint8_t reference_period;
+    uint8_t nom_reference_period;
+    uint16_t inner_tolerance;
+    uint16_t outer_tolerance;
+    uint16_t validation_timer;
+    uint16_t redetect_timer;
+    uint16_t dpll_alpha0_linear;
+    uint16_t dpll_alpha1_exp;
+    uint16_t dpll_alpha2_exp;
+    uint16_t dpll_alpha3_exp;
+    uint16_t dpll_beta0_linear;
+    uint16_t dpll_beta1_exp;
+    uint16_t dpll_gamma0_linear;
+    uint16_t dpll_gamma1_exp;
+    uint16_t dpll_delta0_linear;
+    uint16_t dpll_delta1_exp;
+    uint32_t r_div;
+    uint32_t s_div;
+    uint32_t u_div;
+    uint32_t v_div;
+    uint16_t phase_lock_threshold;
+    uint16_t phase_lock_fill_rate;
+    uint16_t phase_lock_drain_rate;
+    uint16_t freq_lock_threshold;
+    uint16_t freq_lock_fill_rate;
+    uint16_t freq_lock_drain_rate;
 };
 
 struct ad9548_reference_spec 
 {
-    unsigned char ref_num;
-    unsigned long ref_freq;
-    unsigned char power_down_en;
-    unsigned char logic_family;
-    unsigned char manual_profile_en;
-    unsigned char manual_profile;
+    uint8_t ref_num;
+    uint32_t ref_freq;
+    uint8_t power_down_en;
+    uint8_t logic_family;
+    uint8_t manual_profile_en;
+    uint8_t manual_profile;
 };
 
 struct ad9548_channel_spec 
 {
-    unsigned channel_num;
-    unsigned long channel_divider;
-    unsigned char output_dis;
-    unsigned char low_power_mode_en;
-    unsigned char low_power_sync_en;
-    unsigned char driver_mode;
-    unsigned char cmos_mode_phase_invert;
-    unsigned char polarity_invert_en;
-    unsigned char drive_strength;
-    unsigned char sync_ignore_en;
-    char extended_name[16];
+    uint32_t channel_num;
+    uint32_t channel_divider;
+    uint8_t output_dis;
+    uint8_t low_power_mode_en;
+    uint8_t low_power_sync_en;
+    uint8_t driver_mode;
+    uint8_t cmos_mode_phase_invert;
+    uint8_t polarity_invert_en;
+    uint8_t drive_strength;
+    uint8_t sync_ignore_en;
+    int8_t extended_name[16];
 };
 
 struct ad9548_platform_data 
 {
     /* System clock settings */
-    unsigned char sys_clk_ext_loop_filter_en;
-    unsigned char sys_clk_charge_pump_manual_mode_en;
-    unsigned char sys_clk_pll_lock_detect_timer_dis;
-    unsigned char sys_clk_charge_pump_current;
-    unsigned char sys_clk_pll_lock_detect_timer;
-    unsigned char sys_clk_fedback_div;
-    unsigned char sys_clk_m_div;
-    unsigned char sys_clk_2x_mul_en;
-    unsigned char sys_clk_pll_en;
-    unsigned char sys_clk_source;
-    unsigned long sys_clk_period;
-    unsigned long sys_clk_stability;
+    uint8_t sys_clk_ext_loop_filter_en;
+    uint8_t sys_clk_charge_pump_manual_mode_en;
+    uint8_t sys_clk_pll_lock_detect_timer_dis;
+    uint8_t sys_clk_charge_pump_current;
+    uint8_t sys_clk_pll_lock_detect_timer;
+    uint8_t sys_clk_fedback_div;
+    uint8_t sys_clk_m_div;
+    uint8_t sys_clk_2x_mul_en;
+    uint8_t sys_clk_pll_en;
+    uint8_t sys_clk_source;
+    uint32_t sys_clk_period;
+    uint32_t sys_clk_stability;
     
     /* DPLL Setting */
-    unsigned char dpll_tunning_word0;
-    unsigned char dpll_tunning_word1;
-    unsigned char dpll_tunning_word2; 
-    unsigned char dpll_tunning_word3; 
-    unsigned char dpll_tunning_word4; 
-    unsigned char dpll_tunning_word5;
-    unsigned long dpll_pull_in_range_limit_low;
-    unsigned long dpll_pull_in_range_limit_high;
-    unsigned long dpll_dds_phase_offset;
-    unsigned long dpll_closed_loop_phase_lock_offset_low;
-    unsigned long dpll_closed_loop_phase_lock_offset_high;
-    unsigned long dpll_incremental_phase_lock_offset;
-    unsigned long dpll_phase_slew_limit;
-    unsigned long dpll_history_acc_timer;
-    unsigned short dpll_history_mode;
-    unsigned long dpll_out_freq;
+    uint8_t dpll_tunning_word0;
+    uint8_t dpll_tunning_word1;
+    uint8_t dpll_tunning_word2; 
+    uint8_t dpll_tunning_word3; 
+    uint8_t dpll_tunning_word4; 
+    uint8_t dpll_tunning_word5;
+    uint32_t dpll_pull_in_range_limit_low;
+    uint32_t dpll_pull_in_range_limit_high;
+    uint32_t dpll_dds_phase_offset;
+    uint32_t dpll_closed_loop_phase_lock_offset_low;
+    uint32_t dpll_closed_loop_phase_lock_offset_high;
+    uint32_t dpll_incremental_phase_lock_offset;
+    uint32_t dpll_phase_slew_limit;
+    uint32_t dpll_history_acc_timer;
+    uint16_t dpll_history_mode;
+    uint32_t dpll_out_freq;
 
     /* Clock distribution synchronization */
-    unsigned char clock_distr_ext_resistor;
-    unsigned char clock_distr_high_freq_mode;
-    unsigned short clock_distr_sync_source;
-    unsigned short clock_distr_automatic_sync_mode;
+    uint8_t clock_distr_ext_resistor;
+    uint8_t clock_distr_high_freq_mode;
+    uint16_t clock_distr_sync_source;
+    uint16_t clock_distr_automatic_sync_mode;
    
     /* General settings */    
-    unsigned short watchdog_timer;
-    unsigned short aux_dac_full_scale_current;
-    unsigned char aux_dac_shutdown;
-    unsigned char ref_profile_sel_ssm_startup;
+    uint16_t watchdog_timer;
+    uint16_t aux_dac_full_scale_current;
+    uint8_t aux_dac_shutdown;
+    uint8_t ref_profile_sel_ssm_startup;
 
     /* Output Channel Configuration */
-    int num_channels;
+    int32_t num_channels;
     struct ad9548_channel_spec *channels;
 
     /* Reference inputs */
-    int num_references;
+    int32_t num_references;
     struct ad9548_reference_spec *references;
 
     /* Reference profiles */
     int num_ref_profiles;
     struct ad9548_reference_profile *ref_profiles; 
 
-    char name[32];
+    int8_t name[32];
 };
 
 

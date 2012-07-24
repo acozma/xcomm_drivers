@@ -47,112 +47,112 @@
 struct ad9548_reference_spec ad9548_references[] =  
 {
 	{ //Ref A
-		.ref_num = 0,
-		.ref_freq = 30000000,
-		.power_down_en = 0,
-		.logic_family = 0x00,
-		.manual_profile_en = 0,
-		.manual_profile = 0,
+		0,          //ref_num
+		30000000,   //ref_freq
+		0,          //power_down_en
+		0x00,       //logic_family
+		0,          //manual_profile_en
+		0,          //manual_profile
 	},
 	{ // Ref AA
-		.ref_num = 1,
-		.ref_freq = 30000000,
-		.power_down_en = 0,
-		.logic_family = 0x00,
-		.manual_profile_en = 0,
-		.manual_profile = 0,
+		1,          //ref_num
+		30000000,   //ref_freq
+		0,          //power_down_en
+		0x00,       //logic_family
+		0,          //manual_profile_en
+		0,          //manual_profile
 	}
 };
 
 struct ad9548_channel_spec ad9548_channels[] = 
 {
     {    
-        .channel_num = 0,
-        .channel_divider = 0x03,
-        .output_dis = 0,
-        .low_power_mode_en = 0,
-        .low_power_sync_en = 0,
-        .driver_mode = 0x04,
-        .cmos_mode_phase_invert = 0,
-		.polarity_invert_en = 0,
-        .drive_strength = 0,
-        .sync_ignore_en = 0,
-        .extended_name = "CH0_OUTPUT"
+        0,      //channel_num
+        0x03,   //channel_divider
+        0,      //output_dis
+        0,      //low_power_mode_en
+        0,      //low_power_sync_en
+        0x04,   //driver_mode
+        0,      //cmos_mode_phase_invert
+		0,      //polarity_invert_en
+        0,      //drive_strength
+        0,      //sync_ignore_en
+        "CH0_OUTPUT"    //extended_name
     },
     {    
-        .channel_num = 1,
-        .channel_divider = 0x00,
-        .output_dis = 0,
-        .low_power_mode_en = 0,
-        .low_power_sync_en = 0,
-        .driver_mode = 0x00,
-		.cmos_mode_phase_invert = 0,
-        .polarity_invert_en = 0,
-        .drive_strength = 1,
-        .sync_ignore_en = 0,
-        .extended_name = "CH1_OUTPUT"
+        1,      //channel_num
+        0x00,   //channel_divider
+        0,      //output_dis
+        0,      //low_power_mode_en
+        0,      //low_power_sync_en
+        0x00,   //driver_mode
+		0,      //cmos_mode_phase_invert
+        0,      //polarity_invert_en
+        1,      //drive_strength
+        0,      //sync_ignore_en
+        "CH1_OUTPUT"    //extended_name
     }
 };
 
 struct ad9548_platform_data ad9548_pdata_lpc = 
 {
     /* System clock settings */
-    .sys_clk_ext_loop_filter_en = 0,
-    .sys_clk_charge_pump_manual_mode_en = 0,
-    .sys_clk_pll_lock_detect_timer_dis = 0,
-    .sys_clk_charge_pump_current = 0x03,
-    .sys_clk_pll_lock_detect_timer = 0x00,
-    .sys_clk_fedback_div = 0x28,
-    .sys_clk_m_div = 0,
-    .sys_clk_2x_mul_en = 0,
-    .sys_clk_pll_en = 1,
-    .sys_clk_source = 1,
-    .sys_clk_period = 0x13de43,
-    .sys_clk_stability = 0x000001,
+    0,          //sys_clk_ext_loop_filter_en
+    0,          //sys_clk_charge_pump_manual_mode_en
+    0,          //sys_clk_pll_lock_detect_timer_dis
+    0x03,       //sys_clk_charge_pump_current
+    0x00,       //sys_clk_pll_lock_detect_timer
+    0x28,       //sys_clk_fedback_div
+    0,          //sys_clk_m_div
+    0,          //sys_clk_2x_mul_en
+    1,          //sys_clk_pll_en
+    1,          //sys_clk_source
+    0x13de43,   //sys_clk_period
+    0x000001,   //sys_clk_stability
     
     /* DPLL Setting */
-    .dpll_tunning_word0 = 0x29,
-    .dpll_tunning_word1 = 0x5c,
-    .dpll_tunning_word2 = 0x8f,
-    .dpll_tunning_word3 = 0xc2,
-    .dpll_tunning_word4 = 0xf5,
-	.dpll_tunning_word5 = 0x28,
-    .dpll_pull_in_range_limit_low = 0x000000,
-    .dpll_pull_in_range_limit_high = 0xffffff,
-    .dpll_dds_phase_offset = 0x00,
-    .dpll_closed_loop_phase_lock_offset_low = 0x0000,
-	.dpll_closed_loop_phase_lock_offset_high = 0x0000,
-    .dpll_incremental_phase_lock_offset = 0x03e8,
-    .dpll_phase_slew_limit = 0x0000,
-    .dpll_history_acc_timer = 0x7530,
-    .dpll_history_mode = 0x00,
-    .dpll_out_freq = 30000000,
+    0x29,       //dpll_tunning_word0
+    0x5c,       //dpll_tunning_word1
+    0x8f,       //dpll_tunning_word2
+    0xc2,       //dpll_tunning_word3
+    0xf5,       //dpll_tunning_word4
+	0x28,       //dpll_tunning_word5
+    0x000000,   //dpll_pull_in_range_limit_low
+    0xffffff,   //dpll_pull_in_range_limit_high
+    0x00,       //dpll_dds_phase_offset
+    0x0000,     //dpll_closed_loop_phase_lock_offset_low
+	0x0000,     //dpll_closed_loop_phase_lock_offset_high
+    0x03e8,     //dpll_incremental_phase_lock_offset
+    0x0000,     //dpll_phase_slew_limit
+    0x7530,     //dpll_history_acc_timer
+    0x00,       //dpll_history_mode
+    30000000,   //dpll_out_freq
 
     /* Clock distribution synchronization */
-    .clock_distr_ext_resistor = 0,
-    .clock_distr_high_freq_mode = 0,
-    .clock_distr_sync_source = 0x00,
-    .clock_distr_automatic_sync_mode = 0x02,
+    0,          //clock_distr_ext_resistor
+    0,          //clock_distr_high_freq_mode
+    0x00,       //clock_distr_sync_source
+    0x02,       //clock_distr_automatic_sync_mode
    
     /* General settings */    
-    .watchdog_timer = 0x00,
-    .aux_dac_full_scale_current = 0x1ff,
-    .aux_dac_shutdown = 0,
-    .ref_profile_sel_ssm_startup = 0x01,
+    0x00,       //watchdog_timer
+    0x1ff,      //aux_dac_full_scale_current
+    0,          //aux_dac_shutdown
+    0x01,       //ref_profile_sel_ssm_startup
 
     /* Output Channel Configuration */
-    .num_channels = 2,
-    .channels = ad9548_channels,
+    2,          //num_channels
+    ad9548_channels, //channels
 
     /* Reference inputs */
-    .num_references = 2,
-    .references = ad9548_references,
+    2,          //num_references
+    ad9548_references, //references
 
     /* Reference profiles */
-    .num_ref_profiles = 0,
-    .ref_profiles = 0,
+    0,          //num_ref_profiles
+    0,          //ref_profiles
 
-    .name = "ad9548-lpc"
+    "ad9548-lpc" //name
 };
 
 #endif // __AD9548_CFG_H__

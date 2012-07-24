@@ -43,7 +43,6 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include <stdint.h>
 #include "spi_interface.h"
 #include "AD9122.h"
 
@@ -55,10 +54,10 @@
  *
  * @return None.
 *******************************************************************************/
-int ad9122_write(unsigned char registerAddress,
-				  unsigned char registerValue)
+int32_t ad9122_write(uint8_t registerAddress,
+				     uint8_t registerValue)
 {
-	unsigned char regAddr = 0;
+	uint8_t regAddr = 0;
 	
 	regAddr = (0x7F & registerAddress);
 	return SPI_Write(SPI_SEL_AD9122, regAddr, registerValue);
@@ -71,16 +70,16 @@ int ad9122_write(unsigned char registerAddress,
  *
  * @return registerValue - The register's value or negative error code.
 *******************************************************************************/
-int ad9122_read(unsigned char registerAddress)
+int32_t ad9122_read(uint8_t registerAddress)
 {
-	unsigned char regAddr		= 0;
-	unsigned long registerValue = 0;
-	int ret;
+	uint8_t regAddr		= 0;
+	uint32_t registerValue = 0;
+	int32_t ret;
 
 	regAddr = 0x80 + (0x7F & registerAddress);
     ret = SPI_Read(SPI_SEL_AD9122, regAddr, &registerValue);
 
-	return (ret < 0 ? ret : (int)registerValue);
+	return (ret < 0 ? ret : (int32_t)registerValue);
 }
 
 /***************************************************************************//**
@@ -90,7 +89,7 @@ int ad9122_read(unsigned char registerAddress)
 *******************************************************************************/
 int32_t ad9122_setup()
 {
-	long timeout;
+	int32_t timeout;
 
 	ad9122_reset();
 	ad9122_powerdown_AUX_DAC(0);
@@ -162,7 +161,7 @@ int32_t ad9122_setup()
 *******************************************************************************/
 int32_t ad9122_reset(void)
 {
-	int ret;
+	int32_t ret;
 
     ret = ad9122_write(AD9122_REG_COMM, AD9122_COMM_RESET);
     if(ret < 0)
@@ -176,12 +175,15 @@ int32_t ad9122_reset(void)
 /***************************************************************************//**
  * @brief Sets the power state of the I DAC. 
  *
+ * @param pd - Power state: 0 - powered, 1 - power down. For any other 
+ *             value the function reads back the power state from the hardware.                   
+ *
  * @return Returns the set power state.
 *******************************************************************************/
 int32_t ad9122_powerdown_I_DAC(int32_t pd)
 {
-	int ret;
-    long regValue = 0;
+	int32_t ret;
+    int32_t regValue = 0;
 	
 	if(pd == 1)
 	{
@@ -191,7 +193,7 @@ int32_t ad9122_powerdown_I_DAC(int32_t pd)
         if(ret < 0)
             return ret;
 	}
-	if(pd == 0)
+    else if(pd == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_POWER_CTRL);
 		regValue &= ~AD9122_POWER_CTRL_PD_I_DAC;
@@ -199,9 +201,12 @@ int32_t ad9122_powerdown_I_DAC(int32_t pd)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_POWER_CTRL);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_POWER_CTRL);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_POWER_CTRL_PD_I_DAC);
 }
@@ -209,12 +214,15 @@ int32_t ad9122_powerdown_I_DAC(int32_t pd)
 /***************************************************************************//**
  * @brief Sets the power state of the Q DAC. 
  *
+ * @param pd - Power state: 0 - powered, 1 - power down. For any other 
+ *             value the function reads back the power state from the hardware.                   
+ *
  * @return Returns the set power state.
 *******************************************************************************/
 int32_t adD9122_powerdown_Q_DAC(int32_t pd)
 {
-	int ret;
-    long regValue = 0;
+	int32_t ret;
+    int32_t regValue = 0;
 	
 	if(pd == 1)
 	{
@@ -224,7 +232,7 @@ int32_t adD9122_powerdown_Q_DAC(int32_t pd)
         if(ret < 0)
             return ret;
 	}
-	if(pd == 0)
+	else if(pd == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_POWER_CTRL);
 		regValue &= ~AD9122_POWER_CTRL_PD_Q_DAC;
@@ -232,22 +240,28 @@ int32_t adD9122_powerdown_Q_DAC(int32_t pd)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_POWER_CTRL);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_POWER_CTRL);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_POWER_CTRL_PD_Q_DAC);
 }
 
 /***************************************************************************//**
  * @brief Sets the power state of the data receiver. 
+  *
+ * @param pd - Pwer state: 0 - powered, 1 - power down. For any other 
+ *             value the function reads back the power state from the hardware.                   
  *
  * @return Returns the set power state.
 *******************************************************************************/
 int32_t ad9122_powerdown_DATA_REC(int32_t pd)
 {
-	int ret;
-    unsigned long regValue = 0;
+	int32_t ret;
+    uint32_t regValue = 0;
 	
 	if(pd == 1)
 	{
@@ -257,7 +271,7 @@ int32_t ad9122_powerdown_DATA_REC(int32_t pd)
         if(ret < 0)
             return ret;
 	}
-	if(pd == 0)
+	else if(pd == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_POWER_CTRL);
 		regValue &= ~AD9122_POWER_CTRL_PD_DATA_REC;
@@ -265,22 +279,28 @@ int32_t ad9122_powerdown_DATA_REC(int32_t pd)
         if(ret < 0)
             return ret;
     }
-	regValue = ad9122_read(AD9122_REG_POWER_CTRL);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_POWER_CTRL);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_POWER_CTRL_PD_DATA_REC);
 }
 
 /***************************************************************************//**
  * @brief Sets the power state of the aux DAC.
+  *
+ * @param pd - Power state: 0 - powered, 1 - power down. For any other 
+ *             value the function reads back the power state from the hardware.                   
  *
  * @return Returns the set power state.
 *******************************************************************************/
 int32_t ad9122_powerdown_AUX_DAC(int32_t pd)
 {
-	int ret;
-    unsigned long regValue = 0;
+	int32_t ret;
+    uint32_t regValue = 0;
 	
 	if(pd == 1)
 	{
@@ -290,7 +310,7 @@ int32_t ad9122_powerdown_AUX_DAC(int32_t pd)
         if(ret < 0)
             return ret;
 	}
-	if(pd == 0)
+	else if(pd == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_POWER_CTRL);
 		regValue &= ~AD9122_POWER_CTRL_PD_AUX_ADC;
@@ -298,22 +318,28 @@ int32_t ad9122_powerdown_AUX_DAC(int32_t pd)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_POWER_CTRL);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_POWER_CTRL);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_POWER_CTRL_PD_AUX_ADC);
 }
 
 /***************************************************************************//**
- * @brief Enables (1) or disables (0) the DACCLK duty correction. 
+ * @brief Enables or disables the DACCLK duty correction. 
+ *
+ * @param en - Enable state: 0 - disabled, 1 - enabled. For any other 
+ *             value the function reads back the state from the hardware.                   
  *
  * @return Returns duty correction state.
 *******************************************************************************/
 int32_t ad9122_duty_correction_DACCLK (int32_t en)
 {
-	int ret;
-    unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 
 	if(en == 1)
 	{
@@ -323,7 +349,7 @@ int32_t ad9122_duty_correction_DACCLK (int32_t en)
         if(ret < 0)
             return ret;
 	}
-	if(en == 0)
+	else if(en == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
 		regValue &= ~AD9122_CLK_REC_CTRL_DACCLK_DUTY_CORRECTION;
@@ -331,22 +357,28 @@ int32_t ad9122_duty_correction_DACCLK (int32_t en)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_CLK_REC_CTRL_DACCLK_DUTY_CORRECTION);
 }
 
 /***************************************************************************//**
- * @brief Enables (1) or disables (0) the REFCLK duty correction. 
+ * @brief Enables or disables the REFCLK duty correction. 
+ *
+ * @param en - Enable state: 0 - disabled, 1 - enabled. For any other 
+ *             value the function reads back the state from the hardware.                   
  *
  * @return Returns duty correction state.
 *******************************************************************************/
 int32_t ad9122_duty_correction_REFCLK (int32_t en)
 {
-	int ret;
-    unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 
 	if(en == 1)
 	{
@@ -356,7 +388,7 @@ int32_t ad9122_duty_correction_REFCLK (int32_t en)
         if(ret < 0)
             return ret;
 	}
-	if(en == 0)
+	else if(en == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
 		regValue &= ~AD9122_CLK_REC_CTRL_REFCLK_DUTY_CORRECTION;
@@ -364,22 +396,28 @@ int32_t ad9122_duty_correction_REFCLK (int32_t en)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_CLK_REC_CTRL_REFCLK_DUTY_CORRECTION);
 }
 
 /***************************************************************************//**
- * @brief Enables (1) or disables (0) the DACCLK cross correction. 
+ * @brief Enables or disables the DACCLK cross correction. 
+ *
+ * @param en - Enable state: 0 - disabled, 1 - enabled. For any other 
+ *             value the function reads back the state from the hardware.                   
  *
  * @return Returns cross correction state.
 *******************************************************************************/
 int32_t ad9122_cross_correction_DACCLK (int32_t en)
 {
-	int ret;
-    unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 
 	if(en == 1)
 	{
@@ -389,7 +427,7 @@ int32_t ad9122_cross_correction_DACCLK (int32_t en)
         if(ret < 0)
             return ret;
 	}
-	if(en == 0)
+	else if(en == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
 		regValue &= ~AD9122_CLK_REC_CTRL_DACCLK_CROSS_CORRECTION;
@@ -397,22 +435,28 @@ int32_t ad9122_cross_correction_DACCLK (int32_t en)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_CLK_REC_CTRL_DACCLK_CROSS_CORRECTION);
 }
 
 /***************************************************************************//**
- * @brief Enables (1) or disables (0) the REFCLK cross correction. 
+ * @brief Enables or disables the REFCLK cross correction. 
+ *
+ * @param en - Enable state: 0 - disabled, 1 - enabled. For any other 
+ *             value the function reads back the state from the hardware.                   
  *
  * @return Returns cross correction state.
 *******************************************************************************/
 int32_t ad9122_cross_correction_REFCLK (int32_t en)
 {
-	int ret;
-    unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 
 	if(en == 1)
 	{
@@ -422,7 +466,7 @@ int32_t ad9122_cross_correction_REFCLK (int32_t en)
         if(ret < 0)
             return ret;
 	}
-	if(en == 0)
+	else if(en == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
 		regValue &= ~AD9122_CLK_REC_CTRL_REFCLK_CROSS_CORRECTION;
@@ -430,22 +474,28 @@ int32_t ad9122_cross_correction_REFCLK (int32_t en)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_CLK_REC_CTRL);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_CLK_REC_CTRL_REFCLK_CROSS_CORRECTION);
 }
 
 /***************************************************************************//**
- * @brief Enables (1) or disables (0) the PLL. 
+ * @brief Enables or disables the PLL. 
+ *
+ * @param en - Enable state: 0 - disabled, 1 - enabled. For any other 
+ *             value the function reads back the state from the hardware.                   
  *
  * @return Returns the enable PLL state.
 *******************************************************************************/
 int32_t ad9122_pll_enable(int32_t en)
 {
-	int ret;
-    unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 
 	if(en == 1)
 	{
@@ -455,7 +505,7 @@ int32_t ad9122_pll_enable(int32_t en)
         if(ret < 0)
             return ret;
 	}
-	if(en == 0)
+	else if(en == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_PLL_CTRL_1);
 		regValue &= ~AD9122_PLL_CTRL_1_PLL_EN;
@@ -463,22 +513,28 @@ int32_t ad9122_pll_enable(int32_t en)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_PLL_CTRL_1);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_PLL_CTRL_1);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_PLL_CTRL_1_PLL_EN);
 }
 
 /***************************************************************************//**
- * @brief Enables (1) or disables (0) the manual selection of the PLL band.
+ * @brief Enables or disables the manual selection of the PLL band.
+ *
+ * @param en - Enable state: 0 - disabled, 1 - enabled. For any other 
+ *             value the function reads back the state from the hardware.                   
  *
  * @return Returns the manual enable PLL state.
 *******************************************************************************/
 int32_t ad9122_pll_manual_enable(int32_t en)
 {
-	int ret;
-    unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 
 	if(en == 1)
 	{
@@ -488,7 +544,7 @@ int32_t ad9122_pll_manual_enable(int32_t en)
         if(ret < 0)
             return ret;
 	}
-	if(en == 0)
+	else if(en == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_PLL_CTRL_1);
 		regValue &= ~AD9122_PLL_CTRL_1_PLL_MANUAL_EN;
@@ -496,22 +552,28 @@ int32_t ad9122_pll_manual_enable(int32_t en)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_PLL_CTRL_1);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_PLL_CTRL_1);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_PLL_CTRL_1_PLL_MANUAL_EN);
 }
 
 /***************************************************************************//**
- * @brief Enables (1) or disables (0) the synchronization logic. 
+ * @brief Enables or disables the synchronization logic. 
+ *
+ * @param en - Enable state: 0 - disabled, 1 - enabled. For any other 
+ *             value the function reads back the state from the hardware.                   
  *
  * @return Returns the enable synchronization logic state.
 *******************************************************************************/
 int32_t ad9122_sync_enable(int32_t en)
 {
-	int ret;
-    unsigned char regValue = 0;
+	int32_t ret;
+    uint8_t regValue = 0;
 
 	if(en == 1)
 	{
@@ -521,7 +583,7 @@ int32_t ad9122_sync_enable(int32_t en)
         if(ret < 0)
             return ret;
 	}
-	if(en == 0)
+	else if(en == 0)
 	{
 		regValue = ad9122_read(AD9122_REG_SYNC_CTRL_1);
 		regValue &= ~AD9122_SYNC_CTRL_1_SYNC_EN;
@@ -529,9 +591,12 @@ int32_t ad9122_sync_enable(int32_t en)
         if(ret < 0)
             return ret;
 	}
-	regValue = ad9122_read(AD9122_REG_SYNC_CTRL_1);
-    if(regValue < 0)
-        return regValue;
+    else
+    {
+	    regValue = ad9122_read(AD9122_REG_SYNC_CTRL_1);
+        if(regValue < 0)
+            return regValue;
+    }
 	
 	return (regValue & AD9122_SYNC_CTRL_1_SYNC_EN);
 }
@@ -539,26 +604,37 @@ int32_t ad9122_sync_enable(int32_t en)
 /***************************************************************************//**
  * @brief Sets the full-scale current for I DAC. 
  *
+ * @param fs_adj - Full scale current value. If the value equals INT32_MAX then
+ *                 the function returns the current set value.
+ *
  * @return Returns the set full-scale current.
 *******************************************************************************/
 int32_t ad9122_fs_adj_I_DAC(int32_t fs_adj)
 {
-	unsigned char sleepBit	= 0;
-	unsigned char regData	= 0;
+	uint8_t sleepBit	= 0;
+	uint8_t regData1	= 0;
+    uint8_t regData2	= 0;
 
 	if(fs_adj != INT32_MAX)
 	{
 		/* Read the current state of the sleep bit */
 		sleepBit = (ad9122_read(AD9122_REG_I_DAC_CTRL) &
 					AD9122_I_DAC_CTRL_I_DAC_SLEEP);
-		/* Set the full-scale value and keep the state of the sleep bit. */
-		regData = AD9122_I_DAC_CTRL_I_DAC_FS_ADJ_9_8((fs_adj & 0x0300) >> 8);
-		ad9122_write(AD9122_REG_I_DAC_CTRL, (sleepBit | regData));
-		regData = AD9122_I_DAC_FS_ADJ_I_DAC_FS_ADJ_7_0((fs_adj & 0x00FF) >> 0);
-		ad9122_write(AD9122_REG_I_DAC_FS_ADJ, regData);
+		
+        /* Set the full-scale value and keep the state of the sleep bit. */
+		regData1 = AD9122_I_DAC_CTRL_I_DAC_FS_ADJ_9_8((fs_adj & 0x0300) >> 8);
+		ad9122_write(AD9122_REG_I_DAC_CTRL, (sleepBit | regData1));
+		regData2 = AD9122_I_DAC_FS_ADJ_I_DAC_FS_ADJ_7_0((fs_adj & 0x00FF) >> 0);
+		ad9122_write(AD9122_REG_I_DAC_FS_ADJ, regData2);
+        
+        /* Compute the set full scale current */
+        fs_adj = ((regData1 & 0x3) << 8) + (regData2 << 0);
 	}
-	fs_adj = ((ad9122_read(AD9122_REG_I_DAC_CTRL) & 0x3) << 8) +
-			 (ad9122_read(AD9122_REG_I_DAC_FS_ADJ) << 0);
+    else
+    {
+	    fs_adj = ((ad9122_read(AD9122_REG_I_DAC_CTRL) & 0x3) << 8) +
+			     (ad9122_read(AD9122_REG_I_DAC_FS_ADJ) << 0);
+    }
 	
 	return fs_adj;
 }
@@ -566,72 +642,101 @@ int32_t ad9122_fs_adj_I_DAC(int32_t fs_adj)
 /***************************************************************************//**
  * @brief Sets the full-scale current for Q DAC. 
  *
+ * @param fs_adj - Full scale current value. If the value equals INT32_MAX then
+ *                 the function returns the current set value.
+ *
  * @return Returns the set full-scale current.
 *******************************************************************************/
 int32_t ad9122_fs_adj_Q_DAC(int32_t fs_adj)
 {
-	unsigned char sleepBit	= 0;
-	unsigned char regData	= 0;
+	uint8_t sleepBit	= 0;
+	uint8_t regData1	= 0;
+    uint8_t regData2	= 0;
 	
 	if(fs_adj != INT32_MAX)
 	{
 		/* Read the current state of the sleep bit */
 		sleepBit = (ad9122_read(AD9122_REG_Q_DAC_CTRL) &
 					AD9122_Q_DAC_CTRL_Q_DAC_SLEEP);
+
 		/* Set the full-scale value and keep the state of the sleep bit. */
-		regData = AD9122_Q_DAC_CTRL_Q_DAC_FS_ADJ_9_8((fs_adj & 0x0300) >> 8);
-		ad9122_write(AD9122_REG_Q_DAC_CTRL, (sleepBit | regData));
-		regData = AD9122_Q_DAC_FS_ADJ_Q_DAC_FS_ADJ_7_0((fs_adj & 0x00FF) >> 0);
-		ad9122_write(AD9122_REG_Q_DAC_FS_ADJ, regData);
+		regData1 = AD9122_Q_DAC_CTRL_Q_DAC_FS_ADJ_9_8((fs_adj & 0x0300) >> 8);
+		ad9122_write(AD9122_REG_Q_DAC_CTRL, (sleepBit | regData1));
+		regData2 = AD9122_Q_DAC_FS_ADJ_Q_DAC_FS_ADJ_7_0((fs_adj & 0x00FF) >> 0);
+		ad9122_write(AD9122_REG_Q_DAC_FS_ADJ, regData2);
+
+        /* Compute the set full scale current */
+        fs_adj = ((regData1 & 0x3) << 8) + (regData2 << 0);
 	}
-	fs_adj = ((ad9122_read(AD9122_REG_Q_DAC_CTRL) & 0x3) << 8) +
-			 (ad9122_read(AD9122_REG_Q_DAC_FS_ADJ) << 0);
+    else
+    {
+	    fs_adj = ((ad9122_read(AD9122_REG_Q_DAC_CTRL) & 0x3) << 8) +
+			     (ad9122_read(AD9122_REG_Q_DAC_FS_ADJ) << 0);
+    }
 	
 	return fs_adj;
 }
 
 /***************************************************************************//**
- * @brief Sets the offset of the I DAC. The offset parameter represents the
- *		  value that is added directly to the samples written to the I DAC.
+ * @brief Sets the offset of the I DAC. 
+ *
+ * @param offset - The value that is added directly to the samples written 
+ *                 to the I DAC. If the value equals INT32_MAX then
+ *                 the function returns the current set value.
  *
  * @return Returns the set offset.
 *******************************************************************************/
 int32_t ad9122_offset_I_DAC(int32_t offset)
 {
-	unsigned char regData = 0;
+	uint8_t regData1 = 0;
+    uint8_t regData2 = 0;
 	
 	if(offset != INT32_MAX)
 	{
-		regData = (offset & 0x00FF) >> 0;
-		ad9122_write(AD9122_REG_I_DAC_OFFSET_LSB, regData);
-		regData = (offset & 0xFF00) >> 8;
-		ad9122_write(AD9122_REG_I_DAC_OFFSET_MSB, regData);
+		regData1 = (offset & 0x00FF) >> 0;
+		ad9122_write(AD9122_REG_I_DAC_OFFSET_LSB, regData1);
+		regData2 = (offset & 0xFF00) >> 8;
+		ad9122_write(AD9122_REG_I_DAC_OFFSET_MSB, regData2);
+
+        offset = (regData1 << 8) + (regData2 << 0);
 	}
-	offset = (ad9122_read(AD9122_REG_I_DAC_OFFSET_MSB) << 8) +
-			 (ad9122_read(AD9122_REG_I_DAC_OFFSET_LSB) << 0);
+    else
+    {
+	    offset = (ad9122_read(AD9122_REG_I_DAC_OFFSET_MSB) << 8) +
+			     (ad9122_read(AD9122_REG_I_DAC_OFFSET_LSB) << 0);
+    }
 	
 	return offset;
 }
 
 /***************************************************************************//**
- * @brief Sets the offset of the I DAC. The offset parameter represents the
- *		  value that is added directly to the samples written to the I DAC.
+ * @brief Sets the offset of the Q DAC. 
  *		  
+ * @param offset - The value that is added directly to the samples written 
+ *                 to the Q DAC. If the value equals INT32_MAX then
+ *                 the function returns the current set value.
+ *
  * @return Returns the set offset.
 *******************************************************************************/
 int32_t ad9122_offset_Q_DAC(int32_t offset)
 {
-	unsigned char regData = 0;
+	uint8_t regData1 = 0;
+    uint8_t regData2 = 0;
 	
 	if(offset != INT32_MAX)
 	{
-		regData = (offset & 0x00FF) >> 0;
-		ad9122_write(AD9122_REG_Q_DAC_OFFSET_LSB, regData);
-		regData = (offset & 0xFF00) >> 8;
-		ad9122_write(AD9122_REG_Q_DAC_OFFSET_MSB, regData);
+		regData1 = (offset & 0x00FF) >> 0;
+		ad9122_write(AD9122_REG_Q_DAC_OFFSET_LSB, regData1);
+		regData2 = (offset & 0xFF00) >> 8;
+		ad9122_write(AD9122_REG_Q_DAC_OFFSET_MSB, regData2);
+        
+        offset = (regData1 << 8) + (regData2 << 0);
 	}
-	offset = (ad9122_read(AD9122_REG_Q_DAC_OFFSET_MSB) << 8) +
-			 (ad9122_read(AD9122_REG_Q_DAC_OFFSET_LSB) << 0);
+    else
+    {
+	    offset = (ad9122_read(AD9122_REG_Q_DAC_OFFSET_MSB) << 8) +
+			     (ad9122_read(AD9122_REG_Q_DAC_OFFSET_LSB) << 0);
+    }
 	
 	return offset;
 }
@@ -641,8 +746,8 @@ int32_t ad9122_offset_Q_DAC(int32_t offset)
  *******************************************************************************/
 int32_t ad9122_status_pll_lock()
 {
-	unsigned char regValue	= 0;
-	unsigned char status	= 0;
+	uint8_t regValue	= 0;
+	uint8_t status	= 0;
 	
 	regValue = ad9122_read(AD9122_REG_EVENT_FLAG_1);
 	status = (regValue & AD9122_EVENT_FLAG_1_PLL_LOCKED) != 0;
@@ -655,8 +760,8 @@ int32_t ad9122_status_pll_lock()
  ******************************************************************************/
 int32_t ad9122_status_sync_lock()
 {
-	unsigned char regValue	= 0;
-	unsigned char status	= 0;
+	uint8_t regValue	= 0;
+	uint8_t status	= 0;
 	
 	regValue = ad9122_read(AD9122_REG_EVENT_FLAG_1);
 	status = (regValue & AD9122_EVENT_FLAG_1_SYNC_SIGNAL_LOCKED) != 0;
@@ -669,8 +774,8 @@ int32_t ad9122_status_sync_lock()
  ******************************************************************************/
 int32_t ad9122_status_fifo_warn1()
 {
-	unsigned char regValue	= 0;
-	unsigned char status	= 0;
+	uint8_t regValue	= 0;
+	uint8_t status	= 0;
 	
 	regValue = ad9122_read(AD9122_REG_EVENT_FLAG_1);
 	status = (regValue & AD9122_EVENT_FLAG_1_FIFO_WARNING_1) != 0;
@@ -683,8 +788,8 @@ int32_t ad9122_status_fifo_warn1()
  ******************************************************************************/
 int32_t ad9122_status_fifo_warn2()
 {
-	unsigned char regValue	= 0;
-	unsigned char status	= 0;
+	uint8_t regValue	= 0;
+	uint8_t status	= 0;
 	
 	regValue = ad9122_read(AD9122_REG_EVENT_FLAG_1);
 	status = (regValue & AD9122_EVENT_FLAG_1_FIFO_WARNING_2) != 0;

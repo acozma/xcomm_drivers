@@ -75,15 +75,15 @@ int main()
 	}
 
 	xil_printf("Setting the VGA gain to: %d.%d dB\n\r", (int)gain, (int)((gain - (int)gain) * 100));
-	retGain = XCOMM_SetGain(gain);
+	retGain = (float)XCOMM_SetRxGain((uint32_t)(gain*1000.0f)) / 1000.0f;
 	xil_printf("Actual set VGA gain: %d.%d dB\n\r", (int)retGain, (int)((retGain - (int)retGain) * 100));
 
 	xil_printf("Setting the Rx frequency to: %d\n\r", freqRx);
-    retFreqRx = XCOMM_SetFrequencyRx(freqRx);
+    retFreqRx = XCOMM_SetRxFrequency(freqRx);
     xil_printf("Actual set Rx frequency: %d\n\r", retFreqRx);
 
 	xil_printf("Setting the Tx frequency to: %d\n\r", freqTx);
-    retFreqTx = XCOMM_SetFrequencyTx(freqTx);
+    retFreqTx = XCOMM_SetTxFrequency(freqTx);
     xil_printf("Actual set Tx frequency: %d\n\r", retFreqTx);
 
     xil_printf("Finished XCOMM Test Program\n\r");

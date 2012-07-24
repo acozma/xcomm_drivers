@@ -47,17 +47,17 @@
 /*****************************************************************************/
 /***************************** Include Files *********************************/
 /*****************************************************************************/
-#include "xil_types.h"
+#include <stdint.h>
 
 /*****************************************************************************/
 /************************** Types Declarations *******************************/
 /*****************************************************************************/
 typedef struct _stDevConfig
 {
-    u32 addrWidth; /*!< Registers address width in bits */
-    u32 dataWidth; /*!< Data width in bits */
-    u32 spiConfig; /*!< SPI configuration */
-    u32 spiCS;     /*!< SPI CS value */
+    uint32_t addrWidth; /*!< Registers address width in bits */
+    uint32_t dataWidth; /*!< Data width in bits */
+    uint32_t spiConfig; /*!< SPI configuration */
+    uint32_t spiCS;     /*!< SPI CS value */
 } stDevConfig;
 
 /*****************************************************************************/
@@ -100,8 +100,11 @@ typedef struct _stDevConfig
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
 /*****************************************************************************/
-int SPI_Init(); /*<! Initializes the communication with the PIC */
-int SPI_Read(u32 spiSel, u32 regAddr, u32* data); /*<! Reads data from the selected device */
-int SPI_Write(u32 spiSel, u32 regAddr, u32 data); /*<! Writes data to the selected device */
+/** Initializes the communication with the PIC */
+int32_t SPI_Init(); 
+/** Reads data from the selected device */
+int32_t SPI_Read(uint32_t spiSel, uint32_t regAddr, uint32_t* data); 
+/** Writes data to the selected device */
+int32_t SPI_Write(uint32_t spiSel, uint32_t regAddr, uint32_t data); 
 
 #endif /* __SPI_INTERFACE_H__ */

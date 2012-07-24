@@ -43,13 +43,15 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include <stdint.h>
 #include "spi_interface.h"
 #include "AD8366.h"
 
+/******************************************************************************/
+/************************ Local variables and types ***************************/
+/******************************************************************************/
 struct ad8366_state 
 {
-	unsigned char		ch[2];
+	uint8_t ch[2];
 }ad8366_st;
 
 /***************************************************************************//**
@@ -60,13 +62,13 @@ struct ad8366_state
  *
  * @return Returns 0 in case of success or negative error code
 *******************************************************************************/
-int ad8366_write(unsigned char chAgain, char unsigned chBgain)
+int32_t ad8366_write(uint8_t chAgain, uint8_t chBgain)
 {
-	unsigned char bit				= 0;
-	unsigned char reversedChAgain	= 0;
-	unsigned char reversedChBgain	= 0;
-	unsigned char regAddr			= 0;
-	unsigned short regValue			= 0;
+	uint8_t bit				= 0;
+	uint8_t reversedChAgain	= 0;
+	uint8_t reversedChBgain	= 0;
+	uint8_t regAddr			= 0;
+	uint16_t regValue			= 0;
 	
 	/* Maximum value of the gain can be 0x3F. */
 	chAgain = (chAgain & 0x3F);
@@ -94,14 +96,14 @@ int ad8366_write(unsigned char chAgain, char unsigned chBgain)
  *
  * @return Returns 0 in case of success or negative error code
 *******************************************************************************/
-int ad8366_read_raw(int channel,
-			        int *val,
-			        int *val2,
-			        long m)
+int32_t ad8366_read_raw(int32_t channel,
+			        int32_t *val,
+			        int32_t *val2,
+			        int32_t m)
 {
 	struct ad8366_state *st = &ad8366_st;
-	int ret;
-	unsigned code;
+	int32_t ret;
+	uint32_t code;
 
 	switch (m) 
     {
@@ -132,17 +134,17 @@ int ad8366_read_raw(int channel,
  *
  * @return Returns 0 in case of success or negative error code
 *******************************************************************************/
-static int ad8366_write_raw(int channel,
-			                int val,
-			                int val2,
+static int32_t ad8366_write_raw(int32_t channel,
+			                int32_t val,
+			                int32_t val2,
 			                long mask)
 {
 	struct ad8366_state *st = &ad8366_st;
-	unsigned code;
-	int ret;
+	uint32_t code;
+	int32_t ret;
 
 	/* Values in dB */
-	code = (((u8)val * 1000) + ((u32)val2 / 1000));
+	code = (((uint32_t)val * 1000) + ((uint32_t)val2 / 1000));
 
 	if (code > 20500 || code < 4500)
 		return -1;
@@ -171,17 +173,21 @@ static int ad8366_write_raw(int channel,
 *******************************************************************************/
 float ad8366_out_voltage0_hardwaregain(float gain_dB)
 {
-    int ret;
-    int intPart;
-    int fracPart;
+    int32_t ret;
+    int32_t intPart;
+    int32_t fracPart;
 
-    ret = ad8366_write_raw(0, (int)gain_dB, (int)((gain_dB - (int)gain_dB)*1.0e6f), 0);
-    if(ret < 0)
-        return ret;
+    if((gain_dB <= AD8366_MAX_GAIN) && (gain_dB >= AD8366_MIN_GAIN))
+    {
+        ret = ad8366_write_raw(0, (int32_t)gain_dB, 
+                (int32_t)((gain_dB - (int32_t)gain_dB)*1.0e6f), 0);
+        if(ret < 0)
+            return -1;
+    }
 
     ret = ad8366_read_raw(0, &intPart, &fracPart, 0);
     if(ret < 0)
-        return ret;
+        return -1;
     
     return ((float)intPart + (float)fracPart/1000.0f);
 }
@@ -195,15 +201,21 @@ float ad8366_out_voltage0_hardwaregain(float gain_dB)
 *******************************************************************************/
 float ad8366_out_voltage1_hardwaregain(float gain_dB)
 {
-	int ret;
-	int intPart;
-	int fracPart;
+	int32_t ret;
+	int32_t intPart;
+	int32_t fracPart;
 
-    ret = ad8366_write_raw(1, (int)gain_dB, (int)((gain_dB - (int)gain_dB)*1.0e6f), 0);
+    if((gain_dB <= AD8366_MAX_GAIN) && (gain_dB >= AD8366_MIN_GAIN))
+    {
+        ret = ad8366_write_raw(1, (int32_t)gain_dB, 
+                (int32_t)((gain_dB - (int32_t)gain_dB)*1.0e6f), 0);
+        if(ret < 0)
+            return -1;
+    }
 
     ret = ad8366_read_raw(1, &intPart, &fracPart, 0);
     if(ret < 0)
-        return ret;
+        return -1;
     
     return ((float)intPart + (float)fracPart/1.0e6f);
 }

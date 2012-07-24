@@ -47,145 +47,145 @@
 struct ad9523_channel_spec ad9523_channels[] = 
 {
     {	/* ZD output */
-		.channel_num = 0,
-		.divider_output_invert_en = 0,
-		.sync_ignore_en = 0,
-		.low_power_mode_en = 0,
-		.use_alt_clock_src = 0,
-		.output_dis = 0,
-		.driver_mode = LVDS_4mA,
-		.divider_phase = 0,
-		.channel_divider = 8,
-		.extended_name = "ZD_OUTPUT",
+		0,  //channel_num
+		0,  //divider_output_invert_en
+		0,  //sync_ignore_en
+		0,  //low_power_mode_en
+		0,  //use_alt_clock_src
+		0,  //output_dis
+		LVDS_4mA, //driver_mode
+		0,  //divider_phase
+		8,  //channel_divider
+		"ZD_OUTPUT", //extended_name
 	},
 	{	/* DAC CLK */
-		.channel_num = 1,
-		.divider_output_invert_en = 0,
-		.sync_ignore_en = 0,
-		.low_power_mode_en = 0,
-		.use_alt_clock_src = 0,
-		.output_dis = 0,
-		.driver_mode = LVPECL_8mA,
-		.divider_phase = 0,
-		.channel_divider = 2,
-		.extended_name = "DAC_CLK",
+		1,  //channel_num
+		0,  //divider_output_invert_en
+		0,  //sync_ignore_en
+		0,  //low_power_mode_en
+		0,  //use_alt_clock_src
+		0,  //output_dis
+		LVPECL_8mA, //driver_mode
+		0,  //divider_phase
+		2,  //channel_divider
+		"DAC_CLK", //extended_name
 	},
 	{	/* ADC CLK */
-		.channel_num = 2,
-		.divider_output_invert_en = 0,
-		.sync_ignore_en = 0,
-		.low_power_mode_en = 0,
-		.use_alt_clock_src = 0,
-		.output_dis = 0,
-		.driver_mode = LVDS_7mA,
-		.divider_phase = 0,
-		.channel_divider = 4,
-		.extended_name = "ADC_CLK",
+		2,  //channel_num
+		0,  //divider_output_invert_en
+		0,  //sync_ignore_en
+		0,  //low_power_mode_en
+		0,  //use_alt_clock_src
+		0,  //output_dis
+		LVDS_7mA, //driver_mode
+		0,  //divider_phase
+		4,  //channel_divider
+		"ADC_CLK", //extended_name
 	},
 	{	/* DAC REF CLK */
-		.channel_num = 4,
-		.divider_output_invert_en = 0,
-		.sync_ignore_en = 0,
-		.low_power_mode_en = 0,
-		.use_alt_clock_src = 0,
-		.output_dis = 0,
-		.driver_mode = LVDS_4mA,
-		.divider_phase = 0,
-		.channel_divider = 16,
-		.extended_name = "DAC_REF_CLK",
+		4,  //channel_num
+		0,  //divider_output_invert_en
+		0,  //sync_ignore_en
+		0,  //low_power_mode_en
+		0,  //use_alt_clock_src
+		0,  //output_dis
+		LVDS_4mA, //driver_mode
+		0,  //divider_phase
+		16, //channel_divider
+		"DAC_REF_CLK", //extended_name
 	},
 	{	/* TX LO REF */
-		.channel_num = 5,
-		.divider_output_invert_en = 0,
-		.sync_ignore_en = 0,
-		.low_power_mode_en = 0,
-		.use_alt_clock_src = 0,
-		.output_dis = 0,
-		.driver_mode = CMOS_CONF3,
-		.divider_phase = 0,
-		.channel_divider = 8,
-		.extended_name = "TX_LO_REF_CLK",
+		5,  //channel_num
+		0,  //divider_output_invert_en
+		0,  //sync_ignore_en
+		0,  //low_power_mode_en
+		0,  //use_alt_clock_src
+		0,  //output_dis
+		CMOS_CONF3, //driver_mode
+		0,  //divider_phase
+		8,  //channel_divider
+		"TX_LO_REF_CLK", //extended_name
 	},
 	{	/* DAC DCO */
-		.channel_num = 6,
-		.divider_output_invert_en = 0,
-		.sync_ignore_en = 0,
-		.low_power_mode_en = 0,
-		.use_alt_clock_src = 0,
-		.output_dis = 0,
-		.driver_mode = LVDS_7mA,
-		.divider_phase = 0,
-		.channel_divider = 2,
-		.extended_name = "DAC_DCO_CLK",
+		6,  //channel_num
+		0,  //divider_output_invert_en
+		0,  //sync_ignore_en
+		0,  //low_power_mode_en
+		0,  //use_alt_clock_src
+		0,  //output_dis
+		LVDS_7mA, //driver_mode
+		0,  //divider_phase
+		2,  //channel_divider
+		"DAC_DCO_CLK", //extended_name
 	},
 	{	/* ADC SYNC */
-		.channel_num = 8,
-		.divider_output_invert_en = 0,
-		.sync_ignore_en = 0,
-		.low_power_mode_en = 0,
-		.use_alt_clock_src = 0,
-		.output_dis = 0,
-		.driver_mode = CMOS_CONF3,
-		.divider_phase = 1,
-		.channel_divider = 32,
-		.extended_name = "ADC_SYNC_CLK",
+		8,  //channel_num
+		0,  //divider_output_invert_en
+		0,  //sync_ignore_en
+		0,  //low_power_mode_en
+		0,  //use_alt_clock_src
+		0,  //output_dis
+		CMOS_CONF3, //driver_mode
+		1,  //divider_phase
+		32, //channel_divider
+		"ADC_SYNC_CLK", //extended_name
 	},
 	{	/* RX LO REF */
-		.channel_num = 9,
-		.divider_output_invert_en = 0,
-		.sync_ignore_en = 0,
-		.low_power_mode_en = 0,
-		.use_alt_clock_src = 0,
-		.output_dis = 0,
-		.driver_mode = CMOS_CONF3,
-		.divider_phase = 0,
-		.channel_divider = 8,
-		.extended_name = "RX_LO_REF_CLK",
+		9,  //channel_num
+		0,  //divider_output_invert_en
+		0,  //sync_ignore_en
+		0,  //low_power_mode_en
+		0,  //use_alt_clock_src
+		0,  //output_dis
+		CMOS_CONF3, //driver_mode
+		0,  //divider_phase
+		8,  //channel_divider
+		"RX_LO_REF_CLK", //extended_name
 	},
 };
 
 struct ad9523_platform_data ad9523_pdata_lpc = 
 {
-	.vcxo_freq = 122880000,
+	122880000, //vcxo_freq
  
 	/* Single-Ended Input Configuration */
-	.refa_diff_rcv_en = 1,
-	.refb_diff_rcv_en = 0,
-	.zd_in_diff_en = 1,
-	.osc_in_diff_en = 0,
+	1,  //refa_diff_rcv_en
+	0,  //refb_diff_rcv_en
+	1,  //zd_in_diff_en
+	0,  //osc_in_diff_en
 
-	.refa_cmos_neg_inp_en = 0,
-	.refb_cmos_neg_inp_en = 1,
-	.zd_in_cmos_neg_inp_en = 0,
-	.osc_in_cmos_neg_inp_en = 1,
+	0,  //refa_cmos_neg_inp_en
+	1,  //refb_cmos_neg_inp_en
+	0,  //zd_in_cmos_neg_inp_en
+	1,  //osc_in_cmos_neg_inp_en
  
-	.refa_r_div = 0,
-	.refb_r_div = 0,
-	.pll1_feedback_div = 4,
-	.pll1_charge_pump_current_nA = 2000,
-	.zero_delay_mode_internal_en = 1,
-	.osc_in_feedback_en = 0,
-	.pll1_loop_filter_rzero = 3,
+	0,  //refa_r_div
+	0,  //refb_r_div
+	4,  //pll1_feedback_div
+	2000,   //pll1_charge_pump_current_nA
+	1,  //zero_delay_mode_internal_en
+	0,  //osc_in_feedback_en
+	3,  //pll1_loop_filter_rzero
  
-	.ref_mode = REVERT_TO_REFA,
+	REVERT_TO_REFA, //ref_mode
  
-	.pll2_charge_pump_current_nA = 420000,
-	.pll2_ndiv_a_cnt = 0,
-	.pll2_ndiv_b_cnt = 3,
-	.pll2_freq_doubler_en = 1,
-	.pll2_r2_div = 1,
-	.pll2_vco_diff_m1 = 3,
-	.pll2_vco_diff_m2 = 3,
+	420000, //pll2_charge_pump_current_nA
+	0,  //pll2_ndiv_a_cnt
+	3,  //pll2_ndiv_b_cnt
+	1,  //pll2_freq_doubler_en
+	1,  //pll2_r2_div
+	3,  //pll2_vco_diff_m1
+	3,  //pll2_vco_diff_m2
  
-	.rpole2 = 0,
-	.rzero = 2,
-	.cpole1 = 2,
-	.rzero_bypass_en = 0,
+	0,  //rpole2
+	2,  //rzero
+	2,  //cpole1
+	0,  //rzero_bypass_en
  
 	/* Output Channel Configuration */
-	.num_channels = ARRAY_SIZE(ad9523_channels),
-	.channels = ad9523_channels,
-	.name = "ad9523-lpc"
+	ARRAY_SIZE(ad9523_channels), //num_channels
+	ad9523_channels, //channels
+	"ad9523-lpc" //name
 };
 
 #endif // __AD9523_CFG_H__

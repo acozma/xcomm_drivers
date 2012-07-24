@@ -45,9 +45,9 @@
 #define __I2C_H__
 
 /*****************************************************************************/
-/***************************** Include Files *********************************/
+/******************* Include Files *******************************************/
 /*****************************************************************************/
-#include "xil_types.h"
+#include <stdint.h>
 
 /*****************************************************************************/
 /******************* I2C Registers Definitions *******************************/
@@ -70,10 +70,13 @@
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
 /*****************************************************************************/
-u32	I2C_Init(u32 axiBaseAddr, u32 i2cAddr); /*!< Initializes the communication with the Microblaze I2C peripheral */
-u32 I2C_Read(u32 axiBaseAddr, u32 i2cAddr, u32 regAddr, 
-             u32 rxSize, unsigned char* rxBuf); /*!< Reads data from an I2C slave. */
-u32 I2C_Write(u32 axiBaseAddr, u32 i2cAddr, u32 regAddr, 
-              u32 txSize, unsigned char* txBuf); /*!< Writes data to an I2C slave. */
+/** Initializes the communication with the Microblaze I2C peripheral */
+uint32_t I2C_Init(uint32_t axiBaseAddr, uint32_t i2cAddr); 
+/** Reads data from an I2C slave. */
+uint32_t I2C_Read(uint32_t axiBaseAddr, uint32_t i2cAddr, uint32_t regAddr, 
+                  uint32_t rxSize, uint8_t* rxBuf); 
+/** Writes data to an I2C slave. */
+uint32_t I2C_Write(uint32_t axiBaseAddr, uint32_t i2cAddr, uint32_t regAddr, 
+                   uint32_t txSize, uint8_t* txBuf); 
 
 #endif /* __I2C_H__ */

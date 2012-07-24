@@ -44,18 +44,18 @@
 
 static struct adf4351_platform_data adf4351_pdata_lpc =
 {
-	.clkin = 122880000,
-	.channel_spacing = 10000,
-	.power_up_frequency = 0,
-    .ref_div_factor = 0,
-    .ref_doubler_en = 0,
-    .ref_div2_en = 0,
-    .r2_user_settings = ADF4351_REG2_PD_POLARITY_POS |
-    ADF4351_REG2_CHARGE_PUMP_CURR_uA(2500),
-	.r3_user_settings = ADF4351_REG3_12BIT_CLKDIV_MODE(0),
-	.r4_user_settings = ADF4351_REG4_OUTPUT_PWR(0) |
-    ADF4351_REG4_MUTE_TILL_LOCK_EN,
-	.gpio_lock_detect = -1,
+	122880000,  //clkin
+	10000,      //channel_spacing
+	0,          //power_up_frequency
+    0,          //ref_div_factor
+    0,          //ref_doubler_en
+    0,          //ref_div2_en
+    ADF4351_REG2_PD_POLARITY_POS |
+    ADF4351_REG2_CHARGE_PUMP_CURR_uA(2500), //r2_user_settings
+	ADF4351_REG3_12BIT_CLKDIV_MODE(0),      //r3_user_settings
+	ADF4351_REG4_OUTPUT_PWR(0) |
+    ADF4351_REG4_MUTE_TILL_LOCK_EN,         //r4_user_settings
+	-1,         //gpio_lock_detect
 };
 
 #endif // __AD9523_CFG_H__

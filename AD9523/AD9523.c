@@ -43,19 +43,21 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include <stdint.h>
 #include <math.h>
 #include "spi_interface.h"
 #include "AD9523.h"
 #include "AD9523_cfg.h"
 
+/******************************************************************************/
+/************************ Local variables and types ***************************/
+/******************************************************************************/
 struct ad9523_state 
 {
     struct ad9523_platform_data *pdata;
-    unsigned long vcxo_freq;
-    unsigned long vco_freq;
-    unsigned long vco_out_freq[3];
-    unsigned char vco_out_map[14];
+    uint32_t vcxo_freq;
+    uint32_t vco_freq;
+    uint32_t vco_out_freq[3];
+    uint8_t vco_out_map[14];
 }ad9523_st;
 
 enum ad9523_raw_masks
@@ -88,7 +90,7 @@ enum
 };
 
 /* Platform dependent sleep function */
-extern void msleep(u32 ms_count);
+extern void msleep(uint32_t ms_count);
 
 /* Helpers to avoid excess line breaks */
 #define AD_IFE(_pde, _a, _b) ((pdata->_pde) ? _a : _b)
@@ -101,13 +103,13 @@ extern void msleep(u32 ms_count);
  *
  * @return registerValue - The register's value or negative error code.
 *******************************************************************************/
-int ad9523_read(unsigned long registerAddress)
+int32_t ad9523_read(uint32_t registerAddress)
 {
-	unsigned short	regAddr = 0;
-	unsigned long	registerValue = 0;
-	unsigned long	registerValue1 = 0;
-	int ret;
-	int i = 0;
+	uint16_t	regAddr = 0;
+	uint32_t	registerValue = 0;
+	uint32_t	registerValue1 = 0;
+	int32_t ret;
+	uint32_t i = 0;
 
 	regAddr = 0x8000 + (registerAddress & 0x1FFF);
 	for(i = 0; i < AD9523_TRANSF_LEN(registerAddress); i++)
@@ -119,7 +121,7 @@ int ad9523_read(unsigned long registerAddress)
 		registerValue <<= 8;
 		registerValue |= registerValue1;
 	}
-	return (int)registerValue;
+	return (int32_t)registerValue;
 }
 
 /***************************************************************************//**
@@ -130,12 +132,12 @@ int ad9523_read(unsigned long registerAddress)
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int ad9523_write(unsigned long registerAddress,
-				 unsigned long registerValue)
+int32_t ad9523_write(uint32_t registerAddress,
+				     uint32_t registerValue)
 {
-	int i = 0;
-	int ret;
-	unsigned short regAddr = 0;
+	uint32_t i = 0;
+	int32_t ret;
+	uint16_t regAddr = 0;
 
 	regAddr = (registerAddress & 0x1FFF);
 	for(i = 0; i < AD9523_TRANSF_LEN(registerAddress); i++)
@@ -154,7 +156,7 @@ int ad9523_write(unsigned long registerAddress,
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int ad9523_io_update()
+int32_t ad9523_io_update()
 {
     return ad9523_write(AD9523_IO_UPDATE, AD9523_IO_UPDATE_EN);
 }
@@ -167,14 +169,17 @@ int ad9523_io_update()
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int ad9523_vco_out_map(unsigned ch, unsigned out)
+int32_t ad9523_vco_out_map(uint32_t ch, uint32_t out)
 {
 	struct ad9523_state *st = &ad9523_st;
-	int ret;
-	unsigned mask;
+	int32_t ret;
+	uint32_t mask;
 
 	switch (ch) {
-	case 0 ... 3:
+    case 0:
+    case 1:
+    case 2: 
+    case 3:
 		ret = ad9523_read(AD9523_PLL1_OUTPUT_CHANNEL_CTRL);
 		if (ret < 0)
 			break;
@@ -187,7 +192,9 @@ int ad9523_vco_out_map(unsigned ch, unsigned out)
 		}
 		ret = ad9523_write(AD9523_PLL1_OUTPUT_CHANNEL_CTRL, ret);
 		break;
-	case 4 ... 6:
+    case 4:
+    case 5:
+    case 6:
 		ret = ad9523_read(AD9523_PLL1_OUTPUT_CTRL);
 		if (ret < 0)
 			break;
@@ -198,7 +205,9 @@ int ad9523_vco_out_map(unsigned ch, unsigned out)
 			ret &= ~mask;
 		ret = ad9523_write(AD9523_PLL1_OUTPUT_CTRL, ret);
 		break;
-	case 7 ... 9:
+    case 7:
+    case 8:
+    case 9:
 		ret = ad9523_read(AD9523_PLL1_OUTPUT_CHANNEL_CTRL);
 		if (ret < 0)
 			break;
@@ -229,17 +238,25 @@ int ad9523_vco_out_map(unsigned ch, unsigned out)
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int ad9523_set_clock_provider(int ch, unsigned long freq)
+int32_t ad9523_set_clock_provider(int32_t ch, uint32_t freq)
 {
 	struct ad9523_state *st = &ad9523_st;
-	long tmp1, tmp2;
-	unsigned char use_alt_clk_src;
+	int32_t tmp1, tmp2;
+	uint8_t use_alt_clk_src;
 
 	switch (ch) {
-	case 0 ... 3:
+    case 0:
+    case 1:
+    case 2:
+    case 3:
 		use_alt_clk_src = (freq == st->vco_out_freq[AD9523_VCXO]);
 		break;
-	case 4 ... 9:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
 		tmp1 = st->vco_out_freq[AD9523_VCO1] / freq;
 		tmp2 = st->vco_out_freq[AD9523_VCO2] / freq;
 		tmp1 *= freq;
@@ -267,14 +284,14 @@ int ad9523_set_clock_provider(int ch, unsigned long freq)
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int ad9523_read_raw(int channel,
-                    int *val,
-                    int *val2,
-                    long mask)
+int32_t ad9523_read_raw(int32_t channel,
+                         int32_t *val,
+                         int32_t *val2,
+                         int32_t mask)
 {
 	struct ad9523_state *st = &ad9523_st;
-	unsigned code;
-	int ret;
+	uint32_t code;
+	int32_t ret;
 
 	ret = ad9523_read(AD9523_CHANNEL_CLOCK_DIST(channel));
 
@@ -313,14 +330,14 @@ int ad9523_read_raw(int channel,
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int ad9523_write_raw(int channel,
-                     int val,
-                     int val2,
-                     long mask)
+int32_t ad9523_write_raw(int32_t channel,
+                         int32_t val,
+                         int32_t val2,
+                         int32_t mask)
 {
 	struct ad9523_state *st = &ad9523_st;
-	unsigned reg;
-	int ret, tmp, code;
+	uint32_t reg;
+	int32_t ret, tmp, code;
 
 	ret = ad9523_read(AD9523_CHANNEL_CLOCK_DIST(channel));
 	if (ret < 0)
@@ -378,7 +395,7 @@ out:
 *******************************************************************************/
 int32_t ad9523_store_eeprom()
 {
-	int ret, tmp;
+	int32_t ret, tmp;
 
 	ret = ad9523_write(AD9523_EEPROM_CTRL1,
 			   AD9523_EEPROM_CTRL1_EEPROM_WRITE_PROT_DIS);
@@ -418,9 +435,9 @@ int32_t ad9523_store_eeprom()
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int ad9523_sync()
+int32_t ad9523_sync()
 {
-	int ret, tmp;
+	int32_t ret, tmp;
 
 	ret = ad9523_read(AD9523_STATUS_SIGNALS);
 	if (ret < 0)
@@ -447,22 +464,30 @@ int ad9523_sync()
  * @brief Sets the output frequency for selected channel.
  *
  * @param channel - Selected channel number.
- * @param Hz - The output frequency for the selected channel.
+ * @param Hz - The output frequency for the selected channel. If the value is 
+ *             INT64_MAX then the function just returns the already set value.
  *
  * @return Returns negative error code, or the actual frequency in Hz.
 *******************************************************************************/
-int64_t ad9523_out_frequency(int channel, int64_t Hz)
+int64_t ad9523_out_frequency(int32_t channel, int64_t Hz)
 {
-    int ret;
-    int ret_freq;
+    int32_t ret;
+    int32_t ret_freq;
 
-    ret = ad9523_write_raw(channel, Hz, 0, CHAN_INFO_FREQUENCY);
-    if(ret < 0)
-        return ret;
-
-    ret = ad9523_read_raw(channel, &ret_freq, NULL, CHAN_INFO_FREQUENCY);
-    if(ret < 0)
-        return ret;
+    if(Hz != INT64_MAX)
+    {
+        ret = ad9523_write_raw(channel, (int32_t)Hz, 0, CHAN_INFO_FREQUENCY);
+        if(ret < 0)
+            return ret;
+        
+        ret_freq = (int32_t)Hz;
+    }
+    else
+    {
+        ret = ad9523_read_raw(channel, &ret_freq, 0, CHAN_INFO_FREQUENCY);
+        if(ret < 0)
+            return ret;
+    }
 
     return (int64_t)ret_freq;
 }
@@ -471,22 +496,30 @@ int64_t ad9523_out_frequency(int channel, int64_t Hz)
  * @brief Sets the phase for selected channel.
  *
  * @param channel - Selected channel number.
- * @param rad - The phase for the selected channel.
+ * @param rad - The phase for the selected channel. If the value is INT64_MAX 
+ *              then the function just returns the already set value.
  *
  * @return Returns negative error code, or the actual phase in rad. 
 *******************************************************************************/
-int64_t ad9523_out_phase(int channel, int64_t rad)
+int64_t ad9523_out_phase(int32_t channel, int64_t rad)
 {
-    int ret;
-    int ret_phase;
+    int32_t ret;
+    int32_t ret_phase;
 
-    ret = ad9523_write_raw(channel, rad, 0, CHAN_INFO_PHASE);
-    if(ret < 0)
-        return ret;
+    if(rad != INT64_MAX)
+    {
+        ret = ad9523_write_raw(channel, (int32_t)rad, 0, CHAN_INFO_PHASE);
+        if(ret < 0)
+            return ret;
 
-    ret = ad9523_read_raw(channel, &ret_phase, NULL, CHAN_INFO_PHASE);
-    if(ret < 0)
-        return ret;
+        ret_phase = (int32_t)rad;
+    }
+    else
+    {
+        ret = ad9523_read_raw(channel, &ret_phase, 0, CHAN_INFO_PHASE);
+        if(ret < 0)
+            return ret;
+    }
 
     return (int64_t)ret_phase;
 }
@@ -496,22 +529,30 @@ int64_t ad9523_out_phase(int channel, int64_t rad)
  *
  * @param channel - Selected channel number.
  * @param data - '0' powers down channel 0, while any value > 0 enables the
- *				 channel.
+ *				 channel. If the value is INT64_MAX then the function just 
+ *               returns the already set value.
  *
  * @return Returns negative error code, or the actual phase in rad. 
 *******************************************************************************/
-int64_t ad9523_out_raw(int channel, int64_t raw_data)
+int64_t ad9523_out_raw(int32_t channel, int64_t raw_data)
 {
-    int ret;
-    int ret_raw;
+    int32_t ret;
+    int32_t ret_raw;
 
-    ret = ad9523_write_raw(channel, raw_data, 0, CHAN_INFO_RAW);
-    if(ret < 0)
-        return ret;
+    if(raw_data != INT64_MAX)
+    {
+        ret = ad9523_write_raw(channel, (int32_t)raw_data, 0, CHAN_INFO_RAW);
+        if(ret < 0)
+            return ret;
 
-    ret = ad9523_read_raw(channel, &ret_raw, NULL, CHAN_INFO_RAW);
-    if(ret < 0)
-        return ret;
+        ret_raw = (int32_t)raw_data;
+    }
+    else
+    {
+        ret = ad9523_read_raw(channel, &ret_raw, 0, CHAN_INFO_RAW);
+        if(ret < 0)
+            return ret;
+    }
 
     return (int64_t)ret_raw;
 }
@@ -525,7 +566,7 @@ int64_t ad9523_out_raw(int channel, int64_t raw_data)
 *******************************************************************************/
 int32_t ad9523_status(int32_t status_bit)
 {
-    int ret;
+    int32_t ret;
 
     ret = ad9523_read(AD9523_READBACK_0);
     if (ret < 0)
@@ -848,8 +889,8 @@ int32_t ad9523_setup()
 	struct ad9523_state *st = &ad9523_st;
     struct ad9523_platform_data *pdata = &ad9523_pdata_lpc;
 	struct ad9523_channel_spec *chan;
-	unsigned long active_mask = 0;
-	int ret, i;
+	uint32_t active_mask = 0;
+	int32_t ret, i;
 
 	ret = ad9523_write(AD9523_SERIAL_PORT_CONFIG,
 			           AD9523_SER_CONF_SOFT_RESET |
@@ -901,7 +942,7 @@ int32_t ad9523_setup()
 		               AD_IF(refb_diff_rcv_en, AD9523_PLL1_REFB_RCV_EN) |
 		               AD_IF(osc_in_diff_en, AD9523_PLL1_OSC_IN_DIFF_EN) |
 		               AD_IF(osc_in_cmos_neg_inp_en,
-		                     AD9523_PLL1_OSC_IN_CMOS_NEG_INP_EN) |
+		               AD9523_PLL1_OSC_IN_CMOS_NEG_INP_EN) |
 		               AD_IF(refa_diff_rcv_en, AD9523_PLL1_REFA_DIFF_RCV_EN) |
 		               AD_IF(refb_diff_rcv_en, AD9523_PLL1_REFB_DIFF_RCV_EN));
 	if (ret < 0)
@@ -910,9 +951,9 @@ int32_t ad9523_setup()
 	ret = ad9523_write(AD9523_PLL1_REF_CTRL,
 		               AD_IF(zd_in_diff_en, AD9523_PLL1_ZD_IN_DIFF_EN) |
 		               AD_IF(zd_in_cmos_neg_inp_en,
-		                     AD9523_PLL1_ZD_IN_CMOS_NEG_INP_EN) |
+		               AD9523_PLL1_ZD_IN_CMOS_NEG_INP_EN) |
 		               AD_IF(zero_delay_mode_internal_en,
-		                     AD9523_PLL1_ZERO_DELAY_MODE_INT) |
+		               AD9523_PLL1_ZERO_DELAY_MODE_INT) |
 		               AD_IF(osc_in_feedback_en, AD9523_PLL1_OSC_IN_PLL_FEEDBACK_EN) |
 		               AD_IF(refa_cmos_neg_inp_en, AD9523_PLL1_REFA_CMOS_NEG_INP_EN) |
 		               AD_IF(refb_cmos_neg_inp_en, AD9523_PLL1_REFB_CMOS_NEG_INP_EN));
