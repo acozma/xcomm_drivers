@@ -190,20 +190,33 @@ int32_t ad9643_pwd_mode(int32_t mode)
 *******************************************************************************/
 int32_t ad9643_clock_duty_cycle_stabilizer(int32_t en)
 {
+    int32_t ret;
+
 	if(en == 0)
 	{
-		ad9643_write(AD9643_REG_GLOBAL_CLK, 0x00);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+		ret = ad9643_write(AD9643_REG_GLOBAL_CLK, 0x00);
+        if(ret < 0)
+            return ret;
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
 	}
 	else if(en == 1)
 	{
-		ad9643_write(AD9643_REG_GLOBAL_CLK,
+		ret = ad9643_write(AD9643_REG_GLOBAL_CLK,
 					 AD9643_GLOBAL_CLK_DUTY_CYCLE_STABILIZER_EN);
-        ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
+        ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        if(ret < 0)
+            return ret;
 	}
     else
     {
-	    en = ad9643_read(AD9643_REG_GLOBAL_CLK);
+	    ret = ad9643_read(AD9643_REG_GLOBAL_CLK);
+        if(ret < 0)
+            return ret;
+		en = ret & AD9643_GLOBAL_CLK_DUTY_CYCLE_STABILIZER_EN;
     }
 
     return en;
@@ -302,7 +315,7 @@ int32_t ad9643_clock_phase_adj(int32_t adj)
 		if(ret < 0)
             return ret;
 			
-		adj = ret & AD9643_CLK_IN_CLK_DIV_PHASE_ADJ(0x7);
+		adj = (ret & AD9643_CLK_IN_CLK_DIV_PHASE_ADJ(0x7)) >> 3;
 	}
 	return adj;
 }

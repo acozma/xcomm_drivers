@@ -145,7 +145,7 @@ int32_t XCOMM_GetRxResolution(XCOMM_ReadMode readMode);
 /*  ** gain1000: desired gain (x1000) in dB */
 /*  ** if success, return calculated gain (x1000) in dB */
 /*  ** if error, return -1 */
-int32_t XCOMM_SetRxGain(uint32_t gain1000);
+int32_t XCOMM_SetRxGain(int32_t gain1000);
 
 /** Gets the Rx gain */
 /*  ** readMode: read gain from driver or HW */

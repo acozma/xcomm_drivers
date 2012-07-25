@@ -55,6 +55,28 @@ struct ad8366_state
 }ad8366_st;
 
 /***************************************************************************//**
+ * @brief Initializes the AD8366. 
+ *
+ * @return Negative error code or 0 in case of success.
+*******************************************************************************/
+int32_t ad8366_setup()
+{
+	int32_t ret;
+
+	/* Sets the gain of channel A to 4.5 dB */
+	ret = ad8366_out_voltage0_hardwaregain(4500);
+    if(ret < 0)
+        return -1;
+
+	/* Sets the gain of channel B to 4.5 dB */
+	ret = ad8366_out_voltage1_hardwaregain(4500);
+    if(ret < 0)
+        return -1;
+
+	return 0;
+}
+
+/***************************************************************************//**
  * @brief Writes data nto the AD8366
  *
  * @param chAgain - gain value for channel A
@@ -167,20 +189,20 @@ static int32_t ad8366_write_raw(int32_t channel,
 /***************************************************************************//**
  * @brief Sets the gain of channel A.
  *
- * @param gain_dB - the gain to be set in dB
+ * @param gain_dB - the gain to be set in dB * 1000
  *
- * @return Returns the actual set gain
+ * @return Returns the actual set gain * 1000 or negative error code
 *******************************************************************************/
-float ad8366_out_voltage0_hardwaregain(float gain_dB)
+int32_t ad8366_out_voltage0_hardwaregain(int32_t gain_dB)
 {
     int32_t ret;
     int32_t intPart;
     int32_t fracPart;
 
-    if((gain_dB <= AD8366_MAX_GAIN) && (gain_dB >= AD8366_MIN_GAIN))
+    if((gain_dB <= (AD8366_MAX_GAIN * 1000)) && (gain_dB >= (AD8366_MIN_GAIN * 1000)))
     {
-        ret = ad8366_write_raw(0, (int32_t)gain_dB, 
-                (int32_t)((gain_dB - (int32_t)gain_dB)*1.0e6f), 0);
+        ret = ad8366_write_raw(0, (int32_t)(gain_dB / 1000), 
+                (int32_t)((gain_dB % 1000) * 1000), 0);
         if(ret < 0)
             return -1;
     }
@@ -189,26 +211,26 @@ float ad8366_out_voltage0_hardwaregain(float gain_dB)
     if(ret < 0)
         return -1;
     
-    return ((float)intPart + (float)fracPart/1000.0f);
+    return ((intPart * 1000) + (fracPart / 1000));
 }
 
 /***************************************************************************//**
  * @brief Sets the gain of channel B.
  *
- * @param gain_dB - the gain to be set in dB
+ * @param gain_dB - the gain to be set in dB * 1000
  *
- * @return Returns the actual set gain
+ * @return Returns the actual set gain * 1000 or negative error code
 *******************************************************************************/
-float ad8366_out_voltage1_hardwaregain(float gain_dB)
+int32_t ad8366_out_voltage1_hardwaregain(int32_t gain_dB)
 {
 	int32_t ret;
 	int32_t intPart;
 	int32_t fracPart;
 
-    if((gain_dB <= AD8366_MAX_GAIN) && (gain_dB >= AD8366_MIN_GAIN))
+    if((gain_dB <= (AD8366_MAX_GAIN * 1000)) && (gain_dB >= (AD8366_MIN_GAIN * 1000)))
     {
-        ret = ad8366_write_raw(1, (int32_t)gain_dB, 
-                (int32_t)((gain_dB - (int32_t)gain_dB)*1.0e6f), 0);
+        ret = ad8366_write_raw(1, (int32_t)(gain_dB / 1000), 
+                (int32_t)((gain_dB % 1000) * 1000), 0);
         if(ret < 0)
             return -1;
     }
@@ -217,5 +239,5 @@ float ad8366_out_voltage1_hardwaregain(float gain_dB)
     if(ret < 0)
         return -1;
     
-    return ((float)intPart + (float)fracPart/1.0e6f);
+    return ((intPart * 1000) + (fracPart / 1000));
 }

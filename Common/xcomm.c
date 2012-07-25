@@ -126,6 +126,10 @@ int32_t XCOMM_Init()
     if(ret < 0)
         return -1;
 
+    ret = ad8366_setup();
+    if(ret < 0)
+        return -1;
+
     return ret;
 }
 
@@ -261,16 +265,16 @@ int32_t XCOMM_GetRxResolution(XCOMM_ReadMode readMode)
 * @return If success, return calculated gain (x1000) in dB,
 *         if error, return -1
 ******************************************************************************/
-int32_t XCOMM_SetRxGain(uint32_t gain1000)
+int32_t XCOMM_SetRxGain(int32_t gain1000)
 {
-    float retGain = 0;
+    int32_t retGain = 0;
 
-    retGain = ad8366_out_voltage0_hardwaregain((float)gain1000/1000.0f);
-    retGain = ad8366_out_voltage1_hardwaregain((float)gain1000/1000.0f);
+    retGain = ad8366_out_voltage0_hardwaregain(gain1000);
+    retGain = ad8366_out_voltage1_hardwaregain(gain1000);
     if(retGain < 0)
         return -1;
     
-    XCOMM_State.rxGain = (int32_t)(retGain * 1000.0f);
+    XCOMM_State.rxGain = retGain;
     
     return XCOMM_State.rxGain;
 }
@@ -285,14 +289,14 @@ int32_t XCOMM_SetRxGain(uint32_t gain1000)
 ******************************************************************************/
 int32_t XCOMM_GetRxGain(XCOMM_ReadMode readMode)
 {
-    float gain;
+    int32_t gain;
 
     if(readMode == XCOMM_ReadMode_FromHW)
     {
-        gain = ad8366_out_voltage0_hardwaregain(2*AD8366_MAX_GAIN);
+        gain = ad8366_out_voltage0_hardwaregain(2 * (int32_t)AD8366_MAX_GAIN * 1000);
         if(gain < 0)
             return -1;        
-        XCOMM_State.rxGain = (int32_t)(gain * 1000.0f);
+        XCOMM_State.rxGain = gain;
     }
 
     return XCOMM_State.rxGain;

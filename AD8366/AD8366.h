@@ -57,12 +57,15 @@
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
 /*****************************************************************************/
+/** Initializes the AD8366. */
+int32_t ad8366_setup();
+
 /** Sets the gain for channel A. */
 /*  ** Returns the actual set gain */
-float ad8366_out_voltage0_hardwaregain(float gain_dB);
+int32_t ad8366_out_voltage0_hardwaregain(int32_t gain_dB);
 
 /** Sets the gain for channel B. */
 /*  ** Returns the actual set gain */
-float ad8366_out_voltage1_hardwaregain(float gain_dB);
+int32_t ad8366_out_voltage1_hardwaregain(int32_t gain_dB);
 
 #endif // __AD8366_H__
