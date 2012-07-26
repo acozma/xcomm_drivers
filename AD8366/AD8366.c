@@ -201,8 +201,8 @@ int32_t ad8366_out_voltage0_hardwaregain(int32_t gain_dB)
 
     if((gain_dB <= (AD8366_MAX_GAIN * 1000)) && (gain_dB >= (AD8366_MIN_GAIN * 1000)))
     {
-        ret = ad8366_write_raw(0, (int32_t)(gain_dB / 1000), 
-                (int32_t)((gain_dB % 1000) * 1000), 0);
+        ret = ad8366_write_raw(0, gain_dB / 1000, 
+                              (gain_dB % 1000) * 1000, 0);
         if(ret < 0)
             return -1;
     }
@@ -229,8 +229,8 @@ int32_t ad8366_out_voltage1_hardwaregain(int32_t gain_dB)
 
     if((gain_dB <= (AD8366_MAX_GAIN * 1000)) && (gain_dB >= (AD8366_MIN_GAIN * 1000)))
     {
-        ret = ad8366_write_raw(1, (int32_t)(gain_dB / 1000), 
-                (int32_t)((gain_dB % 1000) * 1000), 0);
+        ret = ad8366_write_raw(1, gain_dB / 1000, 
+                              (gain_dB % 1000) * 1000, 0);
         if(ret < 0)
             return -1;
     }
