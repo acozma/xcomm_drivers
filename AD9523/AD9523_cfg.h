@@ -59,7 +59,7 @@ struct ad9523_channel_spec ad9523_channels[] =
 		"ZD_OUTPUT", //extended_name
 	},
 	{	/* DAC CLK */
-		1,  //channel_num
+		12,  //channel_num
 		0,  //divider_output_invert_en
 		0,  //sync_ignore_en
 		0,  //low_power_mode_en
@@ -83,7 +83,7 @@ struct ad9523_channel_spec ad9523_channels[] =
 		"ADC_CLK", //extended_name
 	},
 	{	/* DAC REF CLK */
-		4,  //channel_num
+		10,  //channel_num
 		0,  //divider_output_invert_en
 		0,  //sync_ignore_en
 		0,  //low_power_mode_en
@@ -119,7 +119,7 @@ struct ad9523_channel_spec ad9523_channels[] =
 		"DAC_DCO_CLK", //extended_name
 	},
 	{	/* ADC SYNC */
-		8,  //channel_num
+		7,  //channel_num
 		0,  //divider_output_invert_en
 		0,  //sync_ignore_en
 		0,  //low_power_mode_en
@@ -149,13 +149,13 @@ struct ad9523_platform_data ad9523_pdata_lpc =
 	122880000, //vcxo_freq
  
 	/* Single-Ended Input Configuration */
-	1,  //refa_diff_rcv_en
-	0,  //refb_diff_rcv_en
+	0,  //refa_diff_rcv_en
+	1,  //refb_diff_rcv_en
 	1,  //zd_in_diff_en
 	0,  //osc_in_diff_en
 
-	0,  //refa_cmos_neg_inp_en
-	1,  //refb_cmos_neg_inp_en
+	1,  //refa_cmos_neg_inp_en
+	0,  //refb_cmos_neg_inp_en
 	0,  //zd_in_cmos_neg_inp_en
 	1,  //osc_in_cmos_neg_inp_en
  
@@ -167,7 +167,7 @@ struct ad9523_platform_data ad9523_pdata_lpc =
 	0,  //osc_in_feedback_en
 	3,  //pll1_loop_filter_rzero
  
-	REVERT_TO_REFA, //ref_mode
+	SELECT_REFB, //ref_mode
  
 	420000, //pll2_charge_pump_current_nA
 	0,  //pll2_ndiv_a_cnt
