@@ -296,7 +296,7 @@ int64_t adf4351_set_freq(struct adf4351_state *st, uint64_t freq,
  *
  * @return Returns 0 in case of success or negative error code.
 *******************************************************************************/
-int32_t adf4351_setup(char channel)
+int32_t adf4351_setup(int8_t channel)
 {
 	struct adf4351_state *st = &adf4351_st[(int32_t)channel];
 	st->pdata = &adf4351_pdata_lpc;
@@ -329,7 +329,7 @@ int32_t adf4351_setup(char channel)
  *
  * @return Returns the selected frequency.
 *******************************************************************************/
-int64_t adf4351_out_altvoltage0_frequency(int64_t Hz, char channel)
+int64_t adf4351_out_altvoltage0_frequency(int64_t Hz, int8_t channel)
 {
 	return adf4351_set_freq(&adf4351_st[(int32_t)channel], Hz, channel);
 }
@@ -342,7 +342,7 @@ int64_t adf4351_out_altvoltage0_frequency(int64_t Hz, char channel)
  *
  * @return Returns the selected frequency.
 *******************************************************************************/
-int32_t adf4351_out_altvoltage0_frequency_resolution(int32_t Hz, char channel)
+int32_t adf4351_out_altvoltage0_frequency_resolution(int32_t Hz, int8_t channel)
 {
 	if(Hz != INT32_MAX)
 	{
@@ -358,7 +358,7 @@ int32_t adf4351_out_altvoltage0_frequency_resolution(int32_t Hz, char channel)
  *
  * @return Returns the selected frequency.
 *******************************************************************************/
-int64_t adf4351_out_altvoltage0_refin_frequency(int64_t Hz, char channel)
+int64_t adf4351_out_altvoltage0_refin_frequency(int64_t Hz, int8_t channel)
 {
 	if(Hz != INT32_MAX)
 	{
@@ -378,7 +378,7 @@ int64_t adf4351_out_altvoltage0_refin_frequency(int64_t Hz, char channel)
  *
  * @return Returns the PLL’s power status.
 *******************************************************************************/
-int32_t adf4351_out_altvoltage0_powerdown(int32_t pwd, char channel)
+int32_t adf4351_out_altvoltage0_powerdown(int32_t pwd, int8_t channel)
 {
 	struct adf4351_state *st = &adf4351_st[(int32_t)channel];
 	

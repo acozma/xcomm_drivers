@@ -203,7 +203,7 @@ uint32_t PIC_Read(uint32_t spiSel, uint8_t size, uint32_t* data)
 *
 * @return Returns -1 in case of error, 0 for success
 ******************************************************************************/
-int SPI_Init()
+int32_t SPI_Init()
 {
 	uint8_t wrBuf[1] = {0x02};
 
@@ -221,7 +221,7 @@ int SPI_Init()
 *
 * @return Returns -1 in case of error, 0 for success
 ******************************************************************************/
-int SPI_Read(uint32_t spiSel, uint32_t regAddr, uint32_t* data) 
+int32_t SPI_Read(uint32_t spiSel, uint32_t regAddr, uint32_t* data)
 {
     uint32_t addr;
     uint32_t rSize;
@@ -253,7 +253,7 @@ int SPI_Read(uint32_t spiSel, uint32_t regAddr, uint32_t* data)
 *
 * @return Returns -1 in case of error, 0 for success
 ******************************************************************************/
-int SPI_Write(uint32_t spiSel, uint32_t regAddr, uint32_t data) 
+int32_t SPI_Write(uint32_t spiSel, uint32_t regAddr, uint32_t data)
 {
     uint32_t wData;
     uint32_t wSize;
