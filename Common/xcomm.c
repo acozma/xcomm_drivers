@@ -59,23 +59,35 @@ struct stXCOMM_State
 {
     /* Rx state variables */
     int64_t rxFreq;
+    int8_t  rxFreqValid;    
     int32_t rxResolution;
+    int8_t  rxResolutionValid;    
     int32_t rxGain;
+    int8_t  rxGainValid;    
     XCOMM_IQCorrection rxIqCorrection;
+    int8_t rxIqCorrectionValid;    
     int16_t rxDcCorrection;
+    int8_t  rxDcCorrectionValid;
 
     /* Tx state variables */
     int64_t txFreq;
+    int8_t  txFreqValid;
     int32_t txResolution;
+    int8_t  txResolutionValid;
     XCOMM_IQCorrection txIqCorrection;
+    int8_t txIqCorrectionValid;
     int16_t txDcCorrection;
+    int8_t  txDcCorrectionValid;
 
     /* ADC state variables */
     int64_t adcSampleRate;
+    int8_t  adcSampleRateValid;
     XCOMM_AdcTestMode adcTestMode;
+    int8_t  adcTestModeValid;
 
     /* DAC state variables */
     int64_t dacSampleRate;
+    int8_t  dacSampleRateValid;
 
 }XCOMM_State;
 
@@ -197,6 +209,7 @@ int64_t XCOMM_SetRxFrequency(uint64_t frequency)
         return -1;
 
     XCOMM_State.rxFreq = freq;
+    XCOMM_State.rxFreqValid = 1;
 
     return XCOMM_State.rxFreq;
 }
@@ -209,7 +222,7 @@ int64_t XCOMM_SetRxFrequency(uint64_t frequency)
 ******************************************************************************/
 int64_t XCOMM_GetRxFrequency(void)
 {
-    return XCOMM_State.rxFreq;
+    return XCOMM_State.rxFreqValid ? XCOMM_State.rxFreq : -1;
 }
 
 /**************************************************************************//**
@@ -228,6 +241,7 @@ int32_t XCOMM_SetRxResolution(uint32_t resolution)
         return -1;
 
     XCOMM_State.rxResolution = res;
+    XCOMM_State.rxResolutionValid = 1;
 
     return XCOMM_State.rxResolution;
 }
@@ -252,9 +266,10 @@ int32_t XCOMM_GetRxResolution(XCOMM_ReadMode readMode)
             return -1;
         
         XCOMM_State.rxResolution = res;
+        XCOMM_State.rxResolutionValid = 1;
     }
 
-    return XCOMM_State.rxResolution;
+    return XCOMM_State.rxResolutionValid ? XCOMM_State.rxResolution : -1;
 }
 
 /**************************************************************************//**
@@ -275,6 +290,7 @@ int32_t XCOMM_SetRxGain(int32_t gain1000)
         return -1;
     
     XCOMM_State.rxGain = retGain;
+    XCOMM_State.rxGainValid = 1;
     
     return XCOMM_State.rxGain;
 }
@@ -297,9 +313,10 @@ int32_t XCOMM_GetRxGain(XCOMM_ReadMode readMode)
         if(gain < 0)
             return -1;        
         XCOMM_State.rxGain = gain;
+        XCOMM_State.rxGainValid = 1;
     }
 
-    return XCOMM_State.rxGain;
+    return XCOMM_State.rxGainValid ? XCOMM_State.rxGain : -1;
 }
 
 /**************************************************************************//**
@@ -351,6 +368,7 @@ int64_t XCOMM_SetTxFrequency(uint64_t frequency)
         return -1;
 
     XCOMM_State.txFreq = freq;
+    XCOMM_State.txFreqValid = 1;
 
     return XCOMM_State.txFreq;
 }
@@ -363,7 +381,7 @@ int64_t XCOMM_SetTxFrequency(uint64_t frequency)
 ******************************************************************************/
 int64_t XCOMM_GetTxFrequency(void)
 {
-    return XCOMM_State.txFreq;
+    return XCOMM_State.txFreqValid ? XCOMM_State.txFreq : -1;
 }
 
 /**************************************************************************//**
@@ -382,6 +400,7 @@ int32_t XCOMM_SetTxResolution(uint32_t resolution)
         return -1;
 
     XCOMM_State.txResolution = res;
+    XCOMM_State.txResolutionValid = 1;
 
     return XCOMM_State.txResolution;
 }
@@ -406,9 +425,10 @@ int32_t XCOMM_GetTxResolution(XCOMM_ReadMode readMode)
             return -1;
         
         XCOMM_State.txResolution = res;
+        XCOMM_State.txResolutionValid = 1;
     }
 
-    return XCOMM_State.txResolution;
+    return XCOMM_State.txResolutionValid ? XCOMM_State.txResolution : -1;
 }
 
 /**************************************************************************//**
@@ -460,6 +480,7 @@ int64_t XCOMM_SetAdcSamplingRate(uint64_t rate)
         return -1;
 
     XCOMM_State.adcSampleRate = sampleRate;
+    XCOMM_State.adcSampleRateValid = 1;
 
     return XCOMM_State.adcSampleRate;
 }
@@ -483,9 +504,10 @@ int64_t XCOMM_GetAdcSamplingRate(XCOMM_ReadMode readMode)
             return -1;
         
         XCOMM_State.adcSampleRate = sampleRate;
+        XCOMM_State.adcSampleRateValid = 1;
     }
 
-    return XCOMM_State.adcSampleRate;;
+    return XCOMM_State.adcSampleRateValid ? XCOMM_State.adcSampleRate : -1;
 }
 
 /**************************************************************************//**
@@ -504,6 +526,7 @@ XCOMM_AdcTestMode XCOMM_SetAdcTestMode(XCOMM_AdcTestMode testMode)
         return -1;
 
     XCOMM_State.adcTestMode = mode;
+    XCOMM_State.adcTestModeValid = 1;
 
     return XCOMM_State.adcTestMode;
 }
@@ -527,9 +550,10 @@ XCOMM_AdcTestMode XCOMM_GetAdcTestMode(XCOMM_ReadMode readMode)
             return -1;
 
         XCOMM_State.adcTestMode = mode;
+        XCOMM_State.adcTestModeValid = 1;
     }
 
-    return XCOMM_State.adcTestMode;
+    return XCOMM_State.adcTestModeValid ? XCOMM_State.adcTestMode : -1;
 }
 
 
@@ -552,6 +576,7 @@ int64_t XCOMM_SetDacSamplingRate(uint64_t rate)
         return -1;
 
     XCOMM_State.dacSampleRate = sampleRate;
+    XCOMM_State.dacSampleRateValid = 1;
 
     return XCOMM_State.dacSampleRate;
 }
@@ -575,7 +600,8 @@ int64_t XCOMM_GetDacSamplingRate(XCOMM_ReadMode readMode)
 			return -1;
 
 		XCOMM_State.dacSampleRate = sampleRate;
+        XCOMM_State.dacSampleRateValid = 1;
     }
     
-    return XCOMM_State.dacSampleRate;
+    return XCOMM_State.dacSampleRateValid ? XCOMM_State.dacSampleRate : -1;
 }
