@@ -44,6 +44,7 @@
 /*****************************************************************************/
 /***************************** Include Files *********************************/
 /*****************************************************************************/
+#include <math.h>
 #include <stdint.h>
 #include "ad9548.h"
 #include "ad9523.h"
@@ -51,8 +52,13 @@
 #include "ad9122.h"
 #include "ad9643.h"
 #include "ad8366.h"
+#include "eeprom.h"
 #include "spi_interface.h"
 #include "xcomm.h"
+
+/****** Global variables ******/
+struct fmcomms1_calib_data XCOMM_calData[8];
+uint8_t XCOMM_calDataSize;
 
 /****** XCOMM state structure ******/
 struct stXCOMM_State
@@ -64,7 +70,7 @@ struct stXCOMM_State
     int8_t  rxResolutionValid;    
     int32_t rxGain;
     int8_t  rxGainValid;    
-    XCOMM_IQCorrection rxIqCorrection;
+    XCOMM_RxIQCorrection rxIqCorrection;
     int8_t rxIqCorrectionValid;    
     int16_t rxDcCorrection;
     int8_t  rxDcCorrectionValid;
@@ -74,7 +80,7 @@ struct stXCOMM_State
     int8_t  txFreqValid;
     int32_t txResolution;
     int8_t  txResolutionValid;
-    XCOMM_IQCorrection txIqCorrection;
+    XCOMM_TxIQCorrection txIqCorrection;
     int8_t txIqCorrectionValid;
     int16_t txDcCorrection;
     int8_t  txDcCorrectionValid;
@@ -109,11 +115,17 @@ int32_t XCOMM_Init()
         pData[i] = 0;
     }
 
-    /* Initialize the XCOMM board */
+    /* Initialize the SPI communication */
     ret = SPI_Init();
     if(ret < 0)
     	return -1;
 
+    /* Read the calibration data from the EEPROM */
+    ret = EEPROM_GetCalData((uint8_t*)XCOMM_calData, &XCOMM_calDataSize);
+    if(ret < 0)
+        return -1;
+
+    /* Initialize the XCOMM components */
     ret = ad9548_setup();
     if(ret < 0)
         return -1;
@@ -183,9 +195,42 @@ int32_t XCOMM_Sync(void)
 ******************************************************************************/
 XCOMM_Version XCOMM_GetBoardVersion(XCOMM_ReadMode readMode)
 {
+    int32_t ret;
+    uint8_t data;
+    uint8_t offset;
     XCOMM_Version ver;
 
-    ver.error = 0;
+    ver.error = -1;
+
+    /* Read the Board Area offset from the FRU */
+    ret = EEPROM_Read(IICSEL_FRU, 0x03, &data, 1);
+    if(ret < 0)
+        return ver;
+    offset = (uint16_t)data * 8 + 6;
+
+    /* Read the Board Manufacturer length */
+    ret = EEPROM_Read(IICSEL_FRU, offset, &data, 1);
+    if(ret < 0)
+        return ver;
+    offset += 1 + data;
+
+    /* Read the Board Product Name length */
+    ret = EEPROM_Read(IICSEL_FRU, offset, &data, 1);
+    if(ret < 0)
+        return ver;
+    offset += 1 + data;
+
+    /* Read the Board Serial Number length */
+    ret = EEPROM_Read(IICSEL_FRU, offset, &data, 1);
+    if(ret < 0)
+        return ver;
+
+    /* Read the Board Serial Number */
+    if(!(EEPROM_Read(IICSEL_FRU, offset + 1, ver.value, data) < 0))
+    {
+        ver.value[data] = 0;
+        ver.error = 0;
+    }
 
     return ver;
 }
@@ -325,12 +370,54 @@ int32_t XCOMM_GetRxGain(XCOMM_ReadMode readMode)
 * @param frequency: center frequency used for the correction in Hz
 * @param readMode: read gain and phase correction from driver or HW
 *
-* @return If success, return IQCorrection struct with gain and phase 
-*         correction for the frequency and error set to 0
-*         If error, return IQCorrection struct with error set to -1
+* @return If success, return RxIQCorrection struct with error set to 0
+*         If error, return RxIQCorrection struct with error set to -1
 ******************************************************************************/
-XCOMM_IQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode)
+XCOMM_RxIQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode)
 {
+    uint8_t idx       = 0;
+    uint8_t calIdx    = 0;
+    uint32_t delta    = 0;
+    uint32_t minDelta = UINT32_MAX;
+
+    if(readMode == XCOMM_ReadMode_FromHW)
+    {
+        EEPROM_GetCalData((uint8_t*)XCOMM_calData, &XCOMM_calDataSize);
+    }
+
+    if(!XCOMM_calDataSize)
+    {
+        XCOMM_State.rxIqCorrection.error = -1;
+    }
+    else
+    {
+        frequency /= 1000000;
+        while(idx < XCOMM_calDataSize)
+        {
+            delta = (uint32_t)abs((int32_t)frequency - XCOMM_calData[idx].cal_frequency_MHz);
+            if(delta < minDelta)
+            {
+                minDelta = delta;
+                calIdx = idx;
+            }
+            idx++;
+        }
+        if ((XCOMM_calData[idx].adi_magic0 != ADI_MAGIC_0) || 
+            (XCOMM_calData[idx].adi_magic1 != ADI_MAGIC_1) /*||
+            (XCOMM_calData[idx].version != ADI_VERSION(VERSION_SUPPORTED)*/)
+        {
+            XCOMM_State.rxIqCorrection.error = -1;
+        }
+        else
+        {
+            XCOMM_State.rxIqCorrection.gainI = XCOMM_calData[idx].i_adc_gain_adj;
+            XCOMM_State.rxIqCorrection.offsetI = XCOMM_calData[idx].i_adc_offset_adj;
+            XCOMM_State.rxIqCorrection.gainQ = XCOMM_calData[idx].q_adc_gain_adj;
+            XCOMM_State.rxIqCorrection.offsetQ = XCOMM_calData[idx].q_adc_offset_adj;
+            XCOMM_State.rxIqCorrection.error = 0;
+        }
+    }
+    
     return XCOMM_State.rxIqCorrection;
 }
 
@@ -437,12 +524,58 @@ int32_t XCOMM_GetTxResolution(XCOMM_ReadMode readMode)
 * @param frequency: center frequency used for the correction in Hz
 * @param readMode: read gain and phase correction from driver or HW
 *
-* @return If success, return IQCorrection struct with gain and phase 
-*         correction for the frequency and error set to 0
-*         If error, return IQCorrection struct with error set to -1
+* @return If success, return TxIQCorrection struct with error set to 0
+*         If error, return TxIQCorrection struct with error set to -1
 ******************************************************************************/
-XCOMM_IQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode)
+XCOMM_TxIQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode)
 {
+    uint8_t idx       = 0;
+    uint8_t calIdx    = 0;
+    uint32_t delta    = 0;
+    uint32_t minDelta = UINT32_MAX;
+
+    if(readMode == XCOMM_ReadMode_FromHW)
+    {
+        EEPROM_GetCalData((uint8_t*)XCOMM_calData, &XCOMM_calDataSize);
+    }
+
+    if(!XCOMM_calDataSize)
+    {
+        XCOMM_State.txIqCorrection.error = -1;
+    }
+    else
+    {
+        frequency /= 1000000;
+        while(idx < XCOMM_calDataSize)
+        {
+            delta = (uint32_t)abs((int32_t)frequency - XCOMM_calData[idx].cal_frequency_MHz);
+            if(delta < minDelta)
+            {
+                minDelta = delta;
+                calIdx = idx;
+            }
+            idx++;
+        }
+        if ((XCOMM_calData[idx].adi_magic0 != ADI_MAGIC_0) || 
+            (XCOMM_calData[idx].adi_magic1 != ADI_MAGIC_1) /*||
+            (XCOMM_calData[idx].adi_magic1 != ADI_VERSION(VERSION_SUPPORTED)*/)
+        {
+            XCOMM_State.txIqCorrection.error = -1;
+        }
+        else
+        {
+            XCOMM_State.txIqCorrection.phaseAdjI = XCOMM_calData[idx].i_phase_adj;
+            XCOMM_State.txIqCorrection.offsetI   = XCOMM_calData[idx].i_dac_offset;
+            XCOMM_State.txIqCorrection.fsAdjI    = XCOMM_calData[idx].i_dac_fs_adj;
+            
+            XCOMM_State.txIqCorrection.phaseAdjQ = XCOMM_calData[idx].q_phase_adj;
+            XCOMM_State.txIqCorrection.offsetQ   = XCOMM_calData[idx].q_dac_offset;
+            XCOMM_State.txIqCorrection.fsAdjQ    = XCOMM_calData[idx].q_dac_fs_adj;
+
+            XCOMM_State.txIqCorrection.error = 0;
+        }
+    }
+    
     return XCOMM_State.txIqCorrection;
 }
 

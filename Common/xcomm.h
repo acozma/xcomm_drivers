@@ -78,22 +78,32 @@ typedef enum
 /** Version Buffer Definitions */
 typedef struct
 {
-    unsigned char value[50];
-    uint32_t      error;
+    int8_t      value[50];
+    int32_t     error;
 }XCOMM_Version;
 
-/** Version Buffer Definitions */
+/** Tx IQ Correction Definitions */
 typedef struct
 {
-    int16_t       gainI;
-    int16_t       offsetI; 
-    int16_t       phaseI; 
-    uint32_t      errorI;
-    int16_t       gainQ;
-    int16_t       offsetQ; 
-    int16_t       phaseQ; 
-    uint32_t      errorQ;
-}XCOMM_IQCorrection;
+    int16_t     offsetI; 
+    int16_t     phaseAdjI; 
+    uint32_t    fsAdjI;
+    int16_t     offsetQ; 
+    int16_t     phaseAdjQ; 
+    uint32_t    fsAdjQ;
+    int32_t     error;
+}XCOMM_TxIQCorrection;
+
+
+/** Rx IQ Correction Definitions */
+typedef struct
+{
+    int16_t     gainI;
+    int16_t     offsetI; 
+    int16_t     gainQ;
+    int16_t     offsetQ; 
+    int32_t     error;
+}XCOMM_RxIQCorrection;
 
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
@@ -158,7 +168,7 @@ int32_t XCOMM_GetRxGain(XCOMM_ReadMode readMode);
 /*  ** readMode: read gain and phase correction from driver or HW */
 /*  ** if success, return IQCorrection struct with gain and phase correction for the frequency and error set to 0 */
 /*  ** if error, return IQCorrection struct with error set to -1 */
-XCOMM_IQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode);
+XCOMM_RxIQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode);
 
 /** Gets the Rx DC Offset correction */
 /*  ** frequency: center frequency used for the correction in Hz */
@@ -197,7 +207,7 @@ int32_t XCOMM_GetTxResolution(XCOMM_ReadMode readMode);
 /*  ** readMode: read gain and phase correction from driver or HW */
 /*  ** if success, return IQCorrection struct with gain and phase correction for the frequency and error set to 0 */
 /*  ** if error, return IQCorrection struct with error set to -1 */
-XCOMM_IQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode);
+XCOMM_TxIQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode);
 
 /** Gets the Tx DC offset correction */
 /*  ** frequency: center frequency used for the correction in Hz */

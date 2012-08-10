@@ -218,6 +218,7 @@ int32_t SPI_Init()
 *
 * @param spiSel - SPI CS number
 * @param regAddr - The adress of the register to be read
+* @param data - Buffer to store the read data
 *
 * @return Returns -1 in case of error, 0 for success
 ******************************************************************************/
