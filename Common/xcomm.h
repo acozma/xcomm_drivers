@@ -78,7 +78,7 @@ typedef enum
 /** Version Buffer Definitions */
 typedef struct
 {
-    int8_t      value[50];
+    int8_t      value[128];
     int32_t     error;
 }XCOMM_Version;
 

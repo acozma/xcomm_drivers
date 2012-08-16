@@ -95,6 +95,10 @@ struct stXCOMM_State
     int64_t dacSampleRate;
     int8_t  dacSampleRateValid;
 
+    /* FRU state variables */
+    uint8_t fruData[256];
+    uint8_t fruDataValid;
+
 }XCOMM_State;
 
 /**************************************************************************//**
@@ -196,41 +200,106 @@ int32_t XCOMM_Sync(void)
 XCOMM_Version XCOMM_GetBoardVersion(XCOMM_ReadMode readMode)
 {
     int32_t ret;
-    uint8_t data;
-    uint8_t offset;
+    uint8_t len;
+    uint8_t idx = 0;
+    uint8_t* ptr = XCOMM_State.fruData;
     XCOMM_Version ver;
 
     ver.error = -1;
 
-    /* Read the Board Area offset from the FRU */
-    ret = EEPROM_Read(IICSEL_FRU, 0x03, &data, 1);
-    if(ret < 0)
-        return ver;
-    offset = (uint16_t)data * 8 + 6;
+    /* Read the FRU data */
+    if((!XCOMM_State.fruDataValid) || (readMode == XCOMM_ReadMode_FromHW))
+    {
+        ret = EEPROM_Read(IICSEL_FRU, 0x00, XCOMM_State.fruData, 256);
+        if((ret < 0) || (XCOMM_State.fruData[0] != 0x01))
+            return ver;
+        XCOMM_State.fruDataValid = 1;
+    }
 
-    /* Read the Board Manufacturer length */
-    ret = EEPROM_Read(IICSEL_FRU, offset, &data, 1);
-    if(ret < 0)
-        return ver;
-    offset += 1 + data;
+    /* Move to the Board Area offset from the FRU */
+    ptr += (ptr[3] & 0x3F) * 8 + 6;
 
-    /* Read the Board Product Name length */
-    ret = EEPROM_Read(IICSEL_FRU, offset, &data, 1);
-    if(ret < 0)
-        return ver;
-    offset += 1 + data;
+    /* Read the Board Manufacturer */
+    len = *ptr & 0x3F;
+    ptr++;
+    while(len--)
+    {
+        ver.value[idx++] = *ptr;
+        ptr++;
+        if(!len)
+        {
+            ver.value[idx++] = ',';
+            ver.value[idx++] = ' ';
+        }
+    }    
 
-    /* Read the Board Serial Number length */
-    ret = EEPROM_Read(IICSEL_FRU, offset, &data, 1);
-    if(ret < 0)
-        return ver;
+    /* Read the Board Product Name */
+    len = *ptr & 0x3F;
+    ptr++;
+    while(len--)
+    {
+        ver.value[idx++] = *ptr;
+        ptr++;
+        if(!len)
+        {
+            ver.value[idx++] = ',';
+            ver.value[idx++] = ' ';
+        }
+    }
 
     /* Read the Board Serial Number */
-    if(!(EEPROM_Read(IICSEL_FRU, offset + 1, ver.value, data) < 0))
+    len = *ptr & 0x3F;
+    ptr++;
+    while(len--)
     {
-        ver.value[data] = 0;
-        ver.error = 0;
+        ver.value[idx++] = *ptr;
+        ptr++;
+        if(!len)
+        {
+            ver.value[idx++] = ',';
+            ver.value[idx++] = ' ';
+        }
     }
+
+    /* Read the Board Part Number */
+    len = *ptr & 0x3F;
+    ptr++;
+    while(len--)
+    {
+        ver.value[idx++] = *ptr;
+        ptr++;
+        if(!len)
+        {
+            ver.value[idx++] = ',';
+            ver.value[idx++] = ' ';
+        }
+    }
+
+    /* Read the Board Revision */
+    len = *ptr & 0x3F;
+    ptr += 1 + len;
+    len = *ptr & 0x3F;
+    ptr++;
+    if(*ptr == 0)
+    {
+        ptr++;
+        len--;
+        if(len)
+        {
+            ver.value[idx++] = 'R';
+            ver.value[idx++] = 'e';
+            ver.value[idx++] = 'v';
+            ver.value[idx++] = '.';
+        }
+        while(len--)
+        {
+            ver.value[idx++] = *ptr;
+            ptr++;
+        }
+    }
+
+    ver.value[idx] = 0;
+    ver.error = 0;
 
     return ver;
 }
