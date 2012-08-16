@@ -217,7 +217,7 @@ XCOMM_Version XCOMM_GetBoardVersion(XCOMM_ReadMode readMode)
     }
 
     /* Move to the Board Area offset from the FRU */
-    ptr += (ptr[3] & 0x3F) * 8 + 6;
+    ptr += ptr[3] * 8 + 6;
 
     /* Read the Board Manufacturer */
     len = *ptr & 0x3F;
