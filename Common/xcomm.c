@@ -471,18 +471,18 @@ XCOMM_RxIQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode 
             }
             idx++;
         }
-        if ((XCOMM_calData[idx].adi_magic0 != ADI_MAGIC_0) || 
-            (XCOMM_calData[idx].adi_magic1 != ADI_MAGIC_1) /*||
-            (XCOMM_calData[idx].version != ADI_VERSION(VERSION_SUPPORTED)*/)
+        if ((XCOMM_calData[calIdx].adi_magic0 != ADI_MAGIC_0) ||
+            (XCOMM_calData[calIdx].adi_magic1 != ADI_MAGIC_1) /*||
+            (XCOMM_calData[calIdx].version != ADI_VERSION(VERSION_SUPPORTED)*/)
         {
             XCOMM_State.rxIqCorrection.error = -1;
         }
         else
         {
-            XCOMM_State.rxIqCorrection.gainI = XCOMM_calData[idx].i_adc_gain_adj;
-            XCOMM_State.rxIqCorrection.offsetI = XCOMM_calData[idx].i_adc_offset_adj;
-            XCOMM_State.rxIqCorrection.gainQ = XCOMM_calData[idx].q_adc_gain_adj;
-            XCOMM_State.rxIqCorrection.offsetQ = XCOMM_calData[idx].q_adc_offset_adj;
+            XCOMM_State.rxIqCorrection.gainI = XCOMM_calData[calIdx].i_adc_gain_adj;
+            XCOMM_State.rxIqCorrection.offsetI = XCOMM_calData[calIdx].i_adc_offset_adj;
+            XCOMM_State.rxIqCorrection.gainQ = XCOMM_calData[calIdx].q_adc_gain_adj;
+            XCOMM_State.rxIqCorrection.offsetQ = XCOMM_calData[calIdx].q_adc_offset_adj;
             XCOMM_State.rxIqCorrection.error = 0;
         }
     }
@@ -625,21 +625,21 @@ XCOMM_TxIQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode 
             }
             idx++;
         }
-        if ((XCOMM_calData[idx].adi_magic0 != ADI_MAGIC_0) || 
-            (XCOMM_calData[idx].adi_magic1 != ADI_MAGIC_1) /*||
-            (XCOMM_calData[idx].adi_magic1 != ADI_VERSION(VERSION_SUPPORTED)*/)
+        if ((XCOMM_calData[calIdx].adi_magic0 != ADI_MAGIC_0) ||
+            (XCOMM_calData[calIdx].adi_magic1 != ADI_MAGIC_1) /*||
+            (XCOMM_calData[calIdx].adi_magic1 != ADI_VERSION(VERSION_SUPPORTED)*/)
         {
             XCOMM_State.txIqCorrection.error = -1;
         }
         else
         {
-            XCOMM_State.txIqCorrection.phaseAdjI = XCOMM_calData[idx].i_phase_adj;
-            XCOMM_State.txIqCorrection.offsetI   = XCOMM_calData[idx].i_dac_offset;
-            XCOMM_State.txIqCorrection.fsAdjI    = XCOMM_calData[idx].i_dac_fs_adj;
+            XCOMM_State.txIqCorrection.phaseAdjI = XCOMM_calData[calIdx].i_phase_adj;
+            XCOMM_State.txIqCorrection.offsetI   = XCOMM_calData[calIdx].i_dac_offset;
+            XCOMM_State.txIqCorrection.fsAdjI    = XCOMM_calData[calIdx].i_dac_fs_adj;
             
-            XCOMM_State.txIqCorrection.phaseAdjQ = XCOMM_calData[idx].q_phase_adj;
-            XCOMM_State.txIqCorrection.offsetQ   = XCOMM_calData[idx].q_dac_offset;
-            XCOMM_State.txIqCorrection.fsAdjQ    = XCOMM_calData[idx].q_dac_fs_adj;
+            XCOMM_State.txIqCorrection.phaseAdjQ = XCOMM_calData[calIdx].q_phase_adj;
+            XCOMM_State.txIqCorrection.offsetQ   = XCOMM_calData[calIdx].q_dac_offset;
+            XCOMM_State.txIqCorrection.fsAdjQ    = XCOMM_calData[calIdx].q_dac_fs_adj;
 
             XCOMM_State.txIqCorrection.error = 0;
         }
@@ -734,7 +734,7 @@ XCOMM_AdcTestMode XCOMM_SetAdcTestMode(XCOMM_AdcTestMode testMode)
 }
 
 /**************************************************************************//**
-/* @brief Gets the test mode of the ADC
+* @brief Gets the test mode of the ADC
 *
 * @param readMode: read ADC test mode from driver or HW
 *
@@ -784,7 +784,7 @@ int64_t XCOMM_SetDacSamplingRate(uint64_t rate)
 }
 
 /**************************************************************************//**
-/* @brief Gets the sampling rate of the DAC
+* @brief Gets the sampling rate of the DAC
 *
 * @param readMode: read rate from driver or HW
 *
