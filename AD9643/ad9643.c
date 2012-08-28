@@ -86,10 +86,11 @@ int32_t ad9643_setup()
 {
     ad9643_write(AD9643_REG_CHANNEL_IDX, AD9643_CHANNEL_IDX_ADC_A |
                                          AD9643_CHANNEL_IDX_ADC_B);
+    ad9643_dco_clock_mode(0x01);
 	ad9643_dco_output_clock_delay(1000);
+
     ad9643_write(AD9643_REG_TEST_MODE, 0x00);
-    ad9643_write(AD9643_REG_OUTPUT_MODE, AD9643_OUTPUT_MODE_OUTPUT_EN | 
-                                         AD9643_OUTPUT_MODE_OUTPUT_FORMAT(0x01));
+    ad9643_write(AD9643_REG_OUTPUT_MODE, AD9643_OUTPUT_MODE_OUTPUT_FORMAT(0x01));
     ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
     ad9643_write(AD9643_REG_TRANSFER, 0x00);
 	
