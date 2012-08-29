@@ -50,33 +50,15 @@
 #include <stdint.h>
 
 /*****************************************************************************/
-/******************* I2C Registers Definitions *******************************/
-/*****************************************************************************/
-#define GIE          0x01C
-#define ISR       	 0x020
-#define IER       	 0x028
-#define SOFTR      	 0x040
-#define CR      	 0x100
-#define SR      	 0x104
-#define TX_FIFO  	 0x108
-#define RX_FIFO  	 0x10C
-#define ADR       	 0x110
-#define TX_FIFO_OCY	 0x114
-#define RX_FIFO_OCY	 0x118
-#define TEN_ADDR     0x11C
-#define RX_FIFO_PIRQ 0x120
-#define GPO			 0x124
-
-/*****************************************************************************/
 /************************ Functions Declarations *****************************/
 /*****************************************************************************/
 /** Initializes the communication with the Microblaze I2C peripheral */
-uint32_t I2C_Init(uint32_t axiBaseAddr, uint32_t i2cAddr); 
+uint32_t I2C_Init(uint32_t i2cAddr); 
 /** Reads data from an I2C slave. */
-uint32_t I2C_Read(uint32_t axiBaseAddr, uint32_t i2cAddr, uint32_t regAddr, 
+uint32_t I2C_Read(uint32_t i2cAddr, uint32_t regAddr, 
                   uint32_t rxSize, uint8_t* rxBuf); 
 /** Writes data to an I2C slave. */
-uint32_t I2C_Write(uint32_t axiBaseAddr, uint32_t i2cAddr, uint32_t regAddr, 
+uint32_t I2C_Write(uint32_t i2cAddr, uint32_t regAddr, 
                    uint32_t txSize, uint8_t* txBuf); 
 
 #endif /* __I2C_H__ */
