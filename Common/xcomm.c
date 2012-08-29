@@ -46,12 +46,12 @@
 /*****************************************************************************/
 #include <math.h>
 #include <stdint.h>
-#include "ad9548.h"
-#include "ad9523.h"
-#include "adf4351.h"
-#include "ad9122.h"
-#include "ad9643.h"
-#include "ad8366.h"
+#include "AD9548.h"
+#include "AD9523.h"
+#include "ADF4351.h"
+#include "AD9122.h"
+#include "AD9643.h"
+#include "AD8366.h"
 #include "eeprom.h"
 #include "spi_interface.h"
 #include "xcomm.h"
