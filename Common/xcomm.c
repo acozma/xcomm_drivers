@@ -44,7 +44,6 @@
 /*****************************************************************************/
 /***************************** Include Files *********************************/
 /*****************************************************************************/
-#include <math.h>
 #include <stdint.h>
 #include "AD9548.h"
 #include "AD9523.h"
@@ -447,6 +446,7 @@ XCOMM_RxIQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode 
     uint8_t idx       = 0;
     uint8_t calIdx    = 0;
     uint32_t delta    = 0;
+    int32_t signeddelta    = 0;
     uint32_t minDelta = UINT32_MAX;
 
     if(readMode == XCOMM_ReadMode_FromHW)
@@ -463,7 +463,8 @@ XCOMM_RxIQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode 
         frequency /= 1000000;
         while(idx < XCOMM_calDataSize)
         {
-            delta = (uint32_t)abs((int32_t)frequency - XCOMM_calData[idx].cal_frequency_MHz);
+            signeddelta = (int32_t)(frequency - XCOMM_calData[idx].cal_frequency_MHz);
+            delta = (uint32_t)(signeddelta>0?signeddelta:-signeddelta);
             if(delta < minDelta)
             {
                 minDelta = delta;
@@ -601,6 +602,7 @@ XCOMM_TxIQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode 
     uint8_t idx       = 0;
     uint8_t calIdx    = 0;
     uint32_t delta    = 0;
+    int32_t signeddelta    = 0;
     uint32_t minDelta = UINT32_MAX;
 
     if(readMode == XCOMM_ReadMode_FromHW)
@@ -617,7 +619,8 @@ XCOMM_TxIQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode 
         frequency /= 1000000;
         while(idx < XCOMM_calDataSize)
         {
-            delta = (uint32_t)abs((int32_t)frequency - XCOMM_calData[idx].cal_frequency_MHz);
+            signeddelta = (int32_t)(frequency - XCOMM_calData[idx].cal_frequency_MHz);
+            delta = (uint32_t)(signeddelta>0?signeddelta:-signeddelta);
             if(delta < minDelta)
             {
                 minDelta = delta;
@@ -725,9 +728,9 @@ XCOMM_AdcTestMode XCOMM_SetAdcTestMode(XCOMM_AdcTestMode testMode)
     int32_t mode = ad9643_test_mode(testMode);
 
     if(mode < 0)
-        return -1;
+        return (XCOMM_AdcTestMode)-1;
 
-    XCOMM_State.adcTestMode = mode;
+    XCOMM_State.adcTestMode = (XCOMM_AdcTestMode)mode;
     XCOMM_State.adcTestModeValid = 1;
 
     return XCOMM_State.adcTestMode;
@@ -749,13 +752,13 @@ XCOMM_AdcTestMode XCOMM_GetAdcTestMode(XCOMM_ReadMode readMode)
     {
         mode = ad9643_test_mode(XCOMM_AdcTestMode_Ramp + 1);
         if(mode < 0)
-            return -1;
+            return (XCOMM_AdcTestMode)-1;
 
-        XCOMM_State.adcTestMode = mode;
+        XCOMM_State.adcTestMode = (XCOMM_AdcTestMode)mode;
         XCOMM_State.adcTestModeValid = 1;
     }
 
-    return XCOMM_State.adcTestModeValid ? XCOMM_State.adcTestMode : -1;
+    return XCOMM_State.adcTestModeValid ? XCOMM_State.adcTestMode : (XCOMM_AdcTestMode)-1;
 }
 
 

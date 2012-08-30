@@ -136,7 +136,7 @@ int32_t ad9523_write(uint32_t registerAddress,
 				     uint32_t registerValue)
 {
 	uint32_t i = 0;
-	int32_t ret;
+	int32_t ret = -1;
 	uint16_t regAddr = 0;
 
 	regAddr = (registerAddress & 0x1FFF);
