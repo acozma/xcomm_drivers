@@ -1,6 +1,6 @@
 /**************************************************************************//**
-*   @file   main.c
-*   @brief  XCOMM main program implementation.
+*   @file   i2c.h
+*   @brief  I2C header file.
 *   @author acozma (andrei.cozma@analog.com)
 *
 *******************************************************************************
@@ -40,87 +40,44 @@
 *******************************************************************************
 *   SVN Revision: $WCREV$
 ******************************************************************************/
+#ifndef __TEST_H__
+#define __TEST_H__
 
 /*****************************************************************************/
-/***************************** Include Files *********************************/
+/******************* Constants ***********************************************/
 /*****************************************************************************/
-#include <stdio.h>
-#include <stdint.h>
-#include "platform.h"
-#include "xcomm.h"
-#include "xparameters.h"
-#include "test.h"
+#define CFAD9122_0_BASEADDR   XPAR_AXI_DAC_4D_2C_0_BASEADDR
+#define CFAD9643_0_BASEADDR   XPAR_AXI_ADC_2C_0_BASEADDR
+#define VDMA9122_0_BASEADDR   XPAR_AXI_VDMA_0_BASEADDR
+#define DMA9643_0_BASEADDR    XPAR_AXI_DMA_0_BASEADDR
+#define IIC_0_BASEADDR        XPAR_AXI_IIC_0_BASEADDR
 
-int main()
-{
-    int ret;
-    int mode = 0;
-    float gain = 20.0f;
-    float retGain;
-    uint64_t freqRx = 2400000000ull;
-    uint64_t retFreqRx;
-    uint64_t freqTx = 2400000000ull;
-    uint64_t retFreqTx;
+#define CFAD9122_1_BASEADDR   XPAR_AXI_DAC_4D_2C_1_BASEADDR
+#define CFAD9643_1_BASEADDR   XPAR_AXI_ADC_2C_1_BASEADDR
+#define VDMA9122_1_BASEADDR   XPAR_AXI_VDMA_1_BASEADDR
+#define DMA9643_1_BASEADDR    XPAR_AXI_DMA_0_BASEADDR
+#define IIC_1_BASEADDR        XPAR_AXI_IIC_1_BASEADDR
 
-    init_platform();
+#define DDR_BASEADDR          XPAR_DDR3_SDRAM_S_AXI_BASEADDR + 128*1024*1024
+#define UART_BASEADDR         XPAR_RS232_UART_1_BASEADDR
+#define CFFFT_BASEADDR        XPAR_AXI_FFT_0_BASEADDR
+#define DMAFFT_BASEADDR       XPAR_AXI_DMA_2_BASEADDR
 
-    xil_printf("Running XCOMM Test Program\n\r");
+#define IICSEL_B0LPC          0x04
+#define IICSEL_B1HPC          0x02
+#define IICSEL_B0PIC          0x59
+#define IICSEL_B1PIC          0x58
 
-    xil_printf("\n\rInitializing XCOMM Components...\n\r");
-    ret = XCOMM_Init();
-	if(ret < 0)
-	{
-		xil_printf("XCOMM Init Failed!\n\r");
-		return 0;
-	}
-	else
-	{
-		xil_printf("XCOMM Init OK!\n\r");
-	}
+/*****************************************************************************/
+/************************ Functions Declarations *****************************/
+/*****************************************************************************/
+/** Initializes the DDS core */
+void dds_setup(uint32_t sel, uint32_t f1, uint32_t f2);
+/** Verifies the communication with the DAC */
+void dac_test(uint32_t sel);
+/** Captures data from the ADC */
+void adc_capture(uint32_t sel, uint32_t qwcnt, uint32_t sa);
+/** Verifies the communication with the ADC */
+void adc_test(uint32_t sel, uint32_t mode, uint32_t format);
 
-    xil_printf("\n\rTesting the ADC communication... \n\r");
-    
-    XCOMM_SetAdcTestMode(0x01);
-    adc_capture(IICSEL_B0LPC, 1024, DDR_BASEADDR);
-
-	for (mode = 0x1; mode <= 0x7; mode++)
-	{
-		XCOMM_SetAdcTestMode(mode);
-		adc_test(IICSEL_B0LPC, mode, 0x1);
-	}
-    xil_printf("ADC test complete.\n\r");
-
-    xil_printf("\n\rTesting the DAC communication... \n\r");
-    dac_test(IICSEL_B0LPC);
-    xil_printf("DAC test complete.\n\r");
-
-	xil_printf("\n\rSetting the VGA gain to: %d.%d dB\n\r", (int)gain, (int)((gain - (int)gain) * 100));
-	retGain = (float)XCOMM_SetRxGain((uint32_t)(gain*1000.0f)) / 1000.0f;
-	xil_printf("Actual set VGA gain: %d.%d dB\n\r", (int)retGain, (int)((retGain - (int)retGain) * 100));
-
-	xil_printf("\n\rSetting the Rx frequency to: %lld%06lld\n\r", freqRx/(uint64_t)1e6, freqRx%(uint64_t)1e6);
-    retFreqRx = XCOMM_SetRxFrequency(freqRx);
-    xil_printf("Actual set Rx frequency: %lld%06lld\n\r", retFreqRx/(uint64_t)1e6, retFreqRx%(uint64_t)1e6);
-
-	xil_printf("\n\rSetting the Tx frequency to: %lld%06lld\n\r", freqTx/(uint64_t)1e6, freqTx%(uint64_t)1e6);
-    retFreqTx = XCOMM_SetTxFrequency(freqTx);
-    xil_printf("Actual set Tx frequency: %lld%06lld\n\r", retFreqTx/(uint64_t)1e6, retFreqTx%(uint64_t)1e6);
-
-    xil_printf("\n\rSetting up the DDS... \n\r");
-    dds_setup(IICSEL_B0LPC, 45, 45);
-    xil_printf("DDS setup complete.\n\r");
-
-    xil_printf("\n\rReading data from air... \n\r");
-    XCOMM_SetAdcTestMode(XCOMM_AdcTestMode_Off);
-    while(1)
-    {
-    	adc_capture(IICSEL_B0LPC, 1024, DDR_BASEADDR);
-    }
-    xil_printf("Read data from air complete. \n\r");
-
-    xil_printf("\n\rFinished XCOMM Test Program\n\r");
-
-	cleanup_platform();
-
-    return 0;
-}
+#endif /*__TEST_H__*/
