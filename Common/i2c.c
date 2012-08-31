@@ -182,7 +182,7 @@ uint32_t I2C_Write(uint32_t i2cAddr,
                    uint32_t regAddr, uint32_t txSize, uint8_t* txBuf)
 {
 	uint32_t txCnt = 0;
-	uint32_t timeout = 0xFFFF;
+	uint32_t timeout = 0xFFFFFF;
 
 	// Reset tx fifo
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x002);
@@ -201,7 +201,7 @@ uint32_t I2C_Write(uint32_t i2cAddr,
 	// Write data to the I2C slave
 	while((txCnt < txSize) && (timeout))
 	{
-		timeout = 0xFFFF;
+		timeout = 0xFFFFFF;
 		// put the Tx data into the Tx FIFO
 		Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + TX_FIFO), (txCnt == txSize - 1) ? (0x200 | txBuf[txCnt]) : txBuf[txCnt]);
 		while (((Xil_In32(XPAR_AXI_IIC_0_BASEADDR + SR) & 0x80) == 0x00) && (--timeout));
