@@ -61,7 +61,7 @@ int32_t EEPROM_Read(uint8_t i2cAddr, uint8_t eepromAddr,
 {
     uint32_t ret;
 
-    ret = I2C_Read(i2cAddr, eepromAddr, 
+    ret = I2C_Read(i2cDriver, i2cAddr, eepromAddr, 
                    size, pData);
 
     return (size != ret ? -1 : 0);
@@ -81,7 +81,7 @@ int32_t EEPROM_Write(uint8_t i2cAddr, uint8_t eepromAddr,
 {
     uint32_t ret;
 
-    ret = I2C_Write(i2cAddr, eepromAddr, 
+    ret = I2C_Write(i2cDriver, i2cAddr, eepromAddr, 
                     size, pData);
 
     return (size != ret ? -1 : 0);

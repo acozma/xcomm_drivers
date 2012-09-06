@@ -69,6 +69,7 @@
 /*****************************************************************************/
 /************************ Variables Definitions ******************************/
 /*****************************************************************************/
+void* i2cDriver = 0;
 
 /**************************************************************************//**
 * @brief Delays the program execution with the specified number of ms.
@@ -88,7 +89,7 @@ void msleep(uint32_t ms_count)
 * @param i2cAddr - The address of the I2C slave.
 * @return Returns 0 or negative error code.
 ******************************************************************************/
-uint32_t I2C_Init(uint32_t i2cAddr)
+uint32_t I2C_Init(void* i2cDriver, uint32_t i2cAddr)
 {
 	//disable the I2C core
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x00);
@@ -112,7 +113,7 @@ uint32_t I2C_Init(uint32_t i2cAddr)
 * @param rxBuf - Buffer to store the read data.
 * @return Returns the number of bytes read.
 ******************************************************************************/
-uint32_t I2C_Read(uint32_t i2cAddr, 
+uint32_t I2C_Read(void* i2cDriver, uint32_t i2cAddr, 
                   uint32_t regAddr, uint32_t rxSize, uint8_t* rxBuf)
 {
 	uint32_t rxCnt = 0;
@@ -178,7 +179,7 @@ uint32_t I2C_Read(uint32_t i2cAddr,
 * @param txBuf - Buffer to store the data to be transmitted.
 * @return Returns the number of bytes written.
 ******************************************************************************/
-uint32_t I2C_Write(uint32_t i2cAddr, 
+uint32_t I2C_Write(void* i2cDriver, uint32_t i2cAddr, 
                    uint32_t regAddr, uint32_t txSize, uint8_t* txBuf)
 {
 	uint32_t txCnt = 0;
