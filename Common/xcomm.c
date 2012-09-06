@@ -209,7 +209,7 @@ XCOMM_Version XCOMM_GetBoardVersion(XCOMM_ReadMode readMode)
     /* Read the FRU data */
     if((!XCOMM_State.fruDataValid) || (readMode == XCOMM_ReadMode_FromHW))
     {
-        ret = EEPROM_Read(IICSEL_FRU, 0x00, XCOMM_State.fruData, 256);
+        ret = EEPROM_Read(IICSEL_FRU, 0x00, XCOMM_State.fruData, 255);
         if((ret < 0) || (XCOMM_State.fruData[0] != 0x01))
             return ver;
         XCOMM_State.fruDataValid = 1;
