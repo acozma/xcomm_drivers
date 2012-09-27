@@ -385,9 +385,17 @@ int32_t ad9122_fs_adj_Q_DAC(int32_t fs_adj);
 /*  ** Returns the set offset. */
 int32_t ad9122_offset_I_DAC(int32_t offset);
 
-/** Sets the offset of the I DAC. */
+/** Sets the offset of the Q DAC. */
 /*  ** Returns the set offset. */
 int32_t ad9122_offset_Q_DAC(int32_t offset);
+
+/** Sets the phase adjustment of the I DAC. */
+/*  ** Returns the set phase adjustment. */
+int32_t ad9122_phaseAdj_I_DAC(int32_t phaseAdj);
+
+/** Sets the phase adjustment of the Q DAC. */
+/*  ** Returns the set phase adjustment. */
+int32_t ad9122_phaseAdj_Q_DAC(int32_t phaseAdj);
 
 /** Returns the status of the PLL lock. */
 int32_t ad9122_status_pll_lock();

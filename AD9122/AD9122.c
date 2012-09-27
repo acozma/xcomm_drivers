@@ -742,6 +742,71 @@ int32_t ad9122_offset_Q_DAC(int32_t offset)
 }
 
 /***************************************************************************//**
+ * @brief Sets the phase adjustment of the I DAC. 
+ *
+ * @param offset - The value that is added directly to the samples written 
+ *                 to the I DAC. If the value equals INT32_MAX then
+ *                 the function returns the current set value.
+ *
+ * @return Returns the set phase adjustment.
+*******************************************************************************/
+int32_t ad9122_phaseAdj_I_DAC(int32_t phaseAdj)
+{
+	uint8_t regData1 = 0;
+    uint8_t regData2 = 0;
+	
+	if(phaseAdj != INT32_MAX)
+	{
+		regData1 = (phaseAdj & 0x00FF) >> 0;
+		ad9122_write(AD9122_REG_I_PHA_ADJ_LSB, regData1);
+		regData2 = (phaseAdj & 0xFF00) >> 8;
+		ad9122_write(AD9122_REG_I_PHA_ADJ_MSB, regData2);
+
+        phaseAdj = (regData1 << 8) + (regData2 << 0);
+	}
+    else
+    {
+	    phaseAdj = (ad9122_read(AD9122_REG_I_PHA_ADJ_MSB) << 8) +
+			       (ad9122_read(AD9122_REG_I_PHA_ADJ_LSB) << 0);
+    }
+	
+	return phaseAdj;
+}
+
+/***************************************************************************//**
+ * @brief Sets the phase adjustment of the Q DAC. 
+ *		  
+ * @param offset - The value that is added directly to the samples written 
+ *                 to the Q DAC. If the value equals INT32_MAX then
+ *                 the function returns the current set value.
+ *
+ * @return Returns the set phase adjustment.
+*******************************************************************************/
+int32_t ad9122_phaseAdj_Q_DAC(int32_t phaseAdj)
+{
+	uint8_t regData1 = 0;
+    uint8_t regData2 = 0;
+	
+	if(phaseAdj != INT32_MAX)
+	{
+		regData1 = (phaseAdj & 0x00FF) >> 0;
+		ad9122_write(AD9122_REG_Q_PHA_ADJ_LSB, regData1);
+		regData2 = (phaseAdj & 0xFF00) >> 8;
+		ad9122_write(AD9122_REG_Q_PHA_ADJ_MSB, regData2);
+
+        phaseAdj = (regData1 << 8) + (regData2 << 0);
+	}
+    else
+    {
+	    phaseAdj = (ad9122_read(AD9122_REG_Q_PHA_ADJ_MSB) << 8) +
+			       (ad9122_read(AD9122_REG_Q_PHA_ADJ_LSB) << 0);
+    }
+	
+	return phaseAdj;
+}
+
+
+/***************************************************************************//**
  * @brief Returns the status of the PLL lock.
  *******************************************************************************/
 int32_t ad9122_status_pll_lock()
