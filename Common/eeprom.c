@@ -61,7 +61,7 @@ int32_t EEPROM_Read(uint8_t i2cAddr, uint8_t eepromAddr,
 {
     uint32_t ret;
 
-    ret = I2C_Read(i2cDriver, i2cAddr, eepromAddr, 
+    ret = I2C_Read(i2cAddr, eepromAddr, 
                    size, pData);
 
     return (size != ret ? -1 : 0);
@@ -81,7 +81,7 @@ int32_t EEPROM_Write(uint8_t i2cAddr, uint8_t eepromAddr,
 {
     uint32_t ret;
 
-    ret = I2C_Write(i2cDriver, i2cAddr, eepromAddr, 
+    ret = I2C_Write(i2cAddr, eepromAddr, 
                     size, pData);
 
     return (size != ret ? -1 : 0);
@@ -113,12 +113,12 @@ int32_t EEPROM_GetCalData(uint8_t* pData, uint8_t *pSize)
         (pCalData->adi_magic1 == ADI_MAGIC_1) /*&&
         (pCalData->version == ADI_VERSION(VERSION_SUPPORTED)*/)
     {
-        *pSize++;
+        (*pSize)++;
     }
 
     while(pCalData->next)
     {
-        *pSize++;
+        (*pSize)++;
 		pCalData++;
     }
 

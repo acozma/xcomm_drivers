@@ -52,15 +52,14 @@
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
 /*****************************************************************************/
-extern void* i2cDriver;
 
 /** Initializes the communication with the Microblaze I2C peripheral */
-uint32_t I2C_Init(void* i2cDriver, uint32_t i2cAddr); 
+uint32_t I2C_Init(uint32_t i2cAddr); 
 /** Reads data from an I2C slave. */
-uint32_t I2C_Read(void* i2cDriver, uint32_t i2cAddr, uint32_t regAddr, 
+uint32_t I2C_Read(uint32_t i2cAddr, uint32_t regAddr, 
                   uint32_t rxSize, uint8_t* rxBuf); 
 /** Writes data to an I2C slave. */
-uint32_t I2C_Write(void* i2cDriver, uint32_t i2cAddr, uint32_t regAddr, 
+uint32_t I2C_Write(uint32_t i2cAddr, uint32_t regAddr, 
                    uint32_t txSize, uint8_t* txBuf); 
 
 #endif /* __I2C_H__ */

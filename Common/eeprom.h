@@ -58,6 +58,7 @@
 #define ADI_MAGIC_1	'D'
 #define ADI_VERSION(v)	('0' + (v))
 
+#pragma pack(push, 1) // exact fit - no padding
 struct fmcomms1_calib_data 
 {
 		int8_t   adi_magic0;
@@ -79,7 +80,8 @@ struct fmcomms1_calib_data
         uint16_t i_adc_gain_adj;    /* 16-bit fract 1.15 */
         int16_t  q_adc_offset_adj;  /* 16-bit signed */
         uint16_t q_adc_gain_adj;    /* 16-bit fract 1.15 */
-};// __attribute__((packed));
+};
+#pragma pack(pop) //back to whatever the previous packing mode was  
 
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/

@@ -138,7 +138,7 @@ void PIC_Config(uint32_t spiSel, uint32_t rxCnt, uint8_t csState)
     wrBuf[4] = (devConfig[spiSel].spiCS) & 0xFF;
 
     /* Write data to the PIC */
-    I2C_Write(i2cDriver, IICSEL_PIC, -1, wrSize, wrBuf);
+    I2C_Write(IICSEL_PIC, -1, wrSize, wrBuf);
 }
 
 /**************************************************************************//**
@@ -166,7 +166,7 @@ uint32_t PIC_Write(uint32_t spiSel, uint8_t size, uint32_t data)
     }
 
     /* Write data to the  PIC */
-    return (I2C_Write(i2cDriver, IICSEL_PIC, -1, wrSize, wrBuf) - 1);
+    return (I2C_Write(IICSEL_PIC, -1, wrSize, wrBuf) - 1);
 }
 
 /**************************************************************************//**
@@ -185,7 +185,7 @@ uint32_t PIC_Read(uint32_t spiSel, uint8_t size, uint32_t* data)
     uint8_t rdBuf[8];
 
     /* Read data from the  PIC */
-    rSize = I2C_Read(i2cDriver, IICSEL_PIC, -1, size, rdBuf);
+    rSize = I2C_Read(IICSEL_PIC, -1, size, rdBuf);
     
     /* Build the result from the read data */
     *data = 0;
@@ -206,7 +206,7 @@ int32_t SPI_Init()
 {
 	uint8_t wrBuf[1] = {0x02};
 
-	int ret = I2C_Write(i2cDriver, IICSEL_PIC, -1,
+	int ret = I2C_Write(IICSEL_PIC, -1,
 						sizeof(wrBuf)/sizeof(unsigned char), wrBuf);
 
 	return (ret == 0 ? -1 : 0);
