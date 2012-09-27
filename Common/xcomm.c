@@ -56,7 +56,7 @@
 #include "xcomm.h"
 
 /****** Global variables ******/
-struct fmcomms1_calib_data XCOMM_calData[8];
+struct fmcomms1_calib_data XCOMM_calData[16];
 uint8_t XCOMM_calDataSize;
 
 /****** XCOMM state structure ******/
@@ -71,8 +71,6 @@ struct stXCOMM_State
     int8_t  rxGainValid;    
     XCOMM_RxIQCorrection rxIqCorrection;
     int8_t rxIqCorrectionValid;    
-    int16_t rxDcCorrection;
-    int8_t  rxDcCorrectionValid;
 
     /* Tx state variables */
     int64_t txFreq;
@@ -81,8 +79,6 @@ struct stXCOMM_State
     int8_t  txResolutionValid;
     XCOMM_TxIQCorrection txIqCorrection;
     int8_t txIqCorrectionValid;
-    int16_t txDcCorrection;
-    int8_t  txDcCorrectionValid;
 
     /* ADC state variables */
     int64_t adcSampleRate;
@@ -93,6 +89,8 @@ struct stXCOMM_State
     /* DAC state variables */
     int64_t dacSampleRate;
     int8_t  dacSampleRateValid;
+    XCOMM_DacIQCorrection dacIQCorrection;
+    int8_t  dacIqCorrectionValid;
 
     /* FRU state variables */
     uint8_t fruData[256];
@@ -123,11 +121,6 @@ int32_t XCOMM_Init()
     if(ret < 0)
     	return -1;
 
-    /* Read the calibration data from the EEPROM */
-    ret = EEPROM_GetCalData((uint8_t*)XCOMM_calData, &XCOMM_calDataSize);
-    if(ret < 0)
-        return -1;
-
     /* Initialize the XCOMM components */
     ret = ad9548_setup();
     if(ret < 0)
@@ -157,6 +150,12 @@ int32_t XCOMM_Init()
     if(ret < 0)
         return -1;
 
+    ///* Read the calibration data from the EEPROM */
+    ret = EEPROM_GetCalData((uint8_t*)XCOMM_calData, &XCOMM_calDataSize);
+    if(ret < 0)
+        return -1;
+
+
     return ret;
 }
 
@@ -171,12 +170,10 @@ int32_t XCOMM_Sync(void)
     XCOMM_GetRxResolution(XCOMM_ReadMode_FromHW);
     XCOMM_GetRxGain(XCOMM_ReadMode_FromHW);
     XCOMM_GetRxIqCorrection(0, XCOMM_ReadMode_FromHW);
-    XCOMM_GetRxDcOffset(0, XCOMM_ReadMode_FromHW);
     
     /* Resync Tx state variables */
     XCOMM_GetTxResolution(XCOMM_ReadMode_FromHW);
     XCOMM_GetTxIqCorrection(0, XCOMM_ReadMode_FromHW);
-    XCOMM_GetTxDcOffset(0, XCOMM_ReadMode_FromHW);
 
     /* Resync ADC state variables */
     XCOMM_GetAdcSamplingRate(XCOMM_ReadMode_FromHW);
@@ -184,6 +181,7 @@ int32_t XCOMM_Sync(void)
 
     /* Resync DAC state variables */
     XCOMM_GetDacSamplingRate(XCOMM_ReadMode_FromHW);
+    XCOMM_GetDacIqCorrection(XCOMM_ReadMode_FromHW);
 
     return 0;
 }
@@ -491,21 +489,6 @@ XCOMM_RxIQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode 
     return XCOMM_State.rxIqCorrection;
 }
 
-/**************************************************************************//**
-* @brief Gets the Rx DC Offset correction
-*
-* @param frequency: center frequency used for the correction in Hz
-* @param readMode: read DC offset correction from driver or HW
-*
-* @return If success, return DC offset correction
-*         if error, return -1
-******************************************************************************/
-int16_t XCOMM_GetRxDcOffset(uint64_t frequency, XCOMM_ReadMode readMode)
-{
-    return XCOMM_State.rxDcCorrection;
-}
-
-
 /************************ Tx Functions ***************************************/
 
 
@@ -651,21 +634,6 @@ XCOMM_TxIQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode 
     return XCOMM_State.txIqCorrection;
 }
 
-/**************************************************************************//**
-* @brief Gets the Tx DC Offset correction
-*
-* @param frequency: center frequency used for the correction in Hz
-* @param readMode: read DC offset correction from driver or HW
-*
-* @return If success, return DC offset correction
-*         if error, return -1
-******************************************************************************/
-int16_t XCOMM_GetTxDcOffset(uint64_t frequency, XCOMM_ReadMode readMode)
-{
-    return XCOMM_State.txDcCorrection;
-}
-
-
 /************************ ADC Functions ***************************************/
 
 
@@ -809,4 +777,61 @@ int64_t XCOMM_GetDacSamplingRate(XCOMM_ReadMode readMode)
     }
     
     return XCOMM_State.dacSampleRateValid ? XCOMM_State.dacSampleRate : -1;
+}
+
+/**************************************************************************//**
+* @brief Sets offset and phase correction for I and Q in DAC
+*
+* @param iqCorrection: desired correction
+*
+* @return If success, return IQCorrection struct with error set to 0
+*         if error, return IQCorrection struct with error set to -1
+******************************************************************************/
+XCOMM_DacIQCorrection XCOMM_SetDacIqCorrection(XCOMM_DacIQCorrection daciqCorrection)
+{
+    
+    XCOMM_State.dacIQCorrection.fsAdjI = ad9122_fs_adj_I_DAC(daciqCorrection.fsAdjI);
+    XCOMM_State.dacIQCorrection.fsAdjQ = ad9122_fs_adj_Q_DAC(daciqCorrection.fsAdjQ);
+
+    XCOMM_State.dacIQCorrection.offsetI = ad9122_offset_I_DAC(daciqCorrection.offsetI);
+    XCOMM_State.dacIQCorrection.offsetQ = ad9122_offset_Q_DAC(daciqCorrection.offsetQ);
+
+    XCOMM_State.dacIQCorrection.phaseAdjI = ad9122_phaseAdj_I_DAC(daciqCorrection.phaseAdjI);
+    XCOMM_State.dacIQCorrection.phaseAdjQ = ad9122_phaseAdj_Q_DAC(daciqCorrection.phaseAdjQ);
+
+    XCOMM_State.dacIQCorrection.error = 0;
+    XCOMM_State.dacIqCorrectionValid = 1;
+
+    return XCOMM_State.dacIQCorrection;
+}
+
+/**************************************************************************//**
+* @brief Gets offset and phase correction for I and Q from DAC
+*
+* @param readMode: read rate from driver or HW
+*
+* @return If success, return IQCorrection struct with error set to 0
+*         if error, return IQCorrection struct with error set to -1
+******************************************************************************/
+XCOMM_DacIQCorrection XCOMM_GetDacIqCorrection(XCOMM_ReadMode readMode)
+{
+    
+    int32_t ret = 0;
+
+    if(readMode == XCOMM_ReadMode_FromHW)
+    {
+        XCOMM_State.dacIQCorrection.fsAdjI = ad9122_fs_adj_I_DAC(INT32_MAX);
+        XCOMM_State.dacIQCorrection.fsAdjQ = ad9122_fs_adj_Q_DAC(INT32_MAX);
+
+        XCOMM_State.dacIQCorrection.offsetI = ad9122_offset_I_DAC(INT32_MAX);
+        XCOMM_State.dacIQCorrection.offsetQ = ad9122_offset_Q_DAC(INT32_MAX);
+
+        XCOMM_State.dacIQCorrection.phaseAdjI = ad9122_phaseAdj_I_DAC(INT32_MAX);
+        XCOMM_State.dacIQCorrection.phaseAdjQ = ad9122_phaseAdj_Q_DAC(INT32_MAX);
+
+        XCOMM_State.dacIQCorrection.error = 0;
+        XCOMM_State.dacIqCorrectionValid = 1;
+    }
+
+    return XCOMM_State.dacIQCorrection;
 }

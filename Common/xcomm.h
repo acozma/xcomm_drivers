@@ -105,6 +105,7 @@ typedef struct
     int32_t     error;
 }XCOMM_RxIQCorrection;
 
+typedef XCOMM_TxIQCorrection XCOMM_DacIQCorrection;
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
 /*****************************************************************************/
@@ -170,13 +171,6 @@ int32_t XCOMM_GetRxGain(XCOMM_ReadMode readMode);
 /*  ** if error, return IQCorrection struct with error set to -1 */
 XCOMM_RxIQCorrection XCOMM_GetRxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode);
 
-/** Gets the Rx DC Offset correction */
-/*  ** frequency: center frequency used for the correction in Hz */
-/*  ** readMode: read DC offset correction from driver or HW */
-/*  ** if success, return DC offset correction */
-/*  ** if error, return -1 */
-int16_t XCOMM_GetRxDcOffset(uint64_t frequency, XCOMM_ReadMode readMode);
-
 /************************ Tx Functions *****************************/
 
 /** Sets the Tx center frequency */
@@ -208,14 +202,6 @@ int32_t XCOMM_GetTxResolution(XCOMM_ReadMode readMode);
 /*  ** if success, return IQCorrection struct with gain and phase correction for the frequency and error set to 0 */
 /*  ** if error, return IQCorrection struct with error set to -1 */
 XCOMM_TxIQCorrection XCOMM_GetTxIqCorrection(uint64_t frequency, XCOMM_ReadMode readMode);
-
-/** Gets the Tx DC offset correction */
-/*  ** frequency: center frequency used for the correction in Hz */
-/*  ** readMode: read DC offset correction from driver or HW */
-/*  ** if success, return DC offset correction */
-/*  ** if error, return -1 */
-int16_t XCOMM_GetTxDcOffset(uint64_t frequency, XCOMM_ReadMode readMode);
-
 
 /************************ ADC Functions *****************************/
 
@@ -257,6 +243,19 @@ int64_t XCOMM_SetDacSamplingRate(uint64_t rate);
 /*  ** if success, return rate in Hz */
 /*  ** if error, return -1 */
 int64_t XCOMM_GetDacSamplingRate(XCOMM_ReadMode readMode);
+
+
+/** Sets offset and phase correction for I and Q in DAC*/
+/*  ** daciqCorrection: desired correction*/
+/*  ** if success, return IQCorrection struct with offset and phase correction and error set to 0 */
+/*  ** if error, return IQCorrection struct with error set to -1 */
+XCOMM_DacIQCorrection XCOMM_SetDacIqCorrection(XCOMM_DacIQCorrection daciqCorrection);
+
+/** Gets offset and phase correction for I and Q from DAC*/
+/*  ** readMode: read DAC correction from driver or HW */
+/*  ** if success, return IQCorrection struct with offset and phase correction and error set to 0 */
+/*  ** if error, return IQCorrection struct with error set to -1 */
+XCOMM_DacIQCorrection XCOMM_GetDacIqCorrection(XCOMM_ReadMode readMode);
 
 #endif /* __XCOMM_H__ */
 
