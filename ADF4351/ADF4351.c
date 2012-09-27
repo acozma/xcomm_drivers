@@ -77,7 +77,7 @@ struct adf4351_state
 int32_t adf4351_write(uint32_t data,
 				      int8_t channel)
 {
-	return SPI_Write(channel ? SPI_SEL_ADF4351_RX : SPI_SEL_ADF4351_TX, 0, data);
+	return SPI_Write(channel ? SPI_SEL_ADF4351_TX : SPI_SEL_ADF4351_RX, 0, data);
 }
 
 /***************************************************************************//**
@@ -284,7 +284,8 @@ int64_t adf4351_set_freq(struct adf4351_state *st, uint64_t freq,
 	if(ret < 0)
 		return ret;
 
-	tmp = (st->r0_int + (st->r0_fract / st->r1_mod)) * (st->fpfd / (1 << st->r4_rf_div_sel));
+    tmp = (uint64_t)((st->r0_int * st->r1_mod) + st->r0_fract) * (uint64_t)st->fpfd;
+    tmp = tmp / ((uint64_t)st->r1_mod * ((uint64_t)1 << st->r4_rf_div_sel));
 
 	return tmp;
 }
