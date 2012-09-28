@@ -755,12 +755,13 @@ int32_t ad9122_phaseAdj_I_DAC(int32_t phaseAdj)
 	{
 		regData1 = (phaseAdj & 0x00FF) >> 0;
 		ad9122_write(AD9122_REG_I_PHA_ADJ_LSB, regData1);
-		regData2 = (phaseAdj & 0xFF00) >> 8;
+		regData2 = (phaseAdj & 0x0300) >> 8;
 		ad9122_write(AD9122_REG_I_PHA_ADJ_MSB, regData2);
+        phaseAdj &= 0x03FF;
 	}
     else
     {
-	    phaseAdj = (ad9122_read(AD9122_REG_I_PHA_ADJ_MSB) << 8) +
+	    phaseAdj = ((ad9122_read(AD9122_REG_I_PHA_ADJ_MSB) & 0x03) << 8) +
 			       (ad9122_read(AD9122_REG_I_PHA_ADJ_LSB) << 0);
     }
 	
@@ -785,12 +786,13 @@ int32_t ad9122_phaseAdj_Q_DAC(int32_t phaseAdj)
 	{
 		regData1 = (phaseAdj & 0x00FF) >> 0;
 		ad9122_write(AD9122_REG_Q_PHA_ADJ_LSB, regData1);
-		regData2 = (phaseAdj & 0xFF00) >> 8;
+		regData2 = (phaseAdj & 0x0300) >> 8;
 		ad9122_write(AD9122_REG_Q_PHA_ADJ_MSB, regData2);
+        phaseAdj &= 0x03FF;
 	}
     else
     {
-	    phaseAdj = (ad9122_read(AD9122_REG_Q_PHA_ADJ_MSB) << 8) +
+	    phaseAdj = ((ad9122_read(AD9122_REG_Q_PHA_ADJ_MSB) & 0x03) << 8) +
 			       (ad9122_read(AD9122_REG_Q_PHA_ADJ_LSB) << 0);
     }
 	
