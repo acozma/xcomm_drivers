@@ -87,10 +87,10 @@ typedef struct
 {
     int16_t     offsetI; 
     int16_t     phaseAdjI; 
-    uint32_t    fsAdjI;
+    int32_t     fsAdjI;
     int16_t     offsetQ; 
     int16_t     phaseAdjQ; 
-    uint32_t    fsAdjQ;
+    int32_t     fsAdjQ;
     int32_t     error;
 }XCOMM_TxIQCorrection;
 
