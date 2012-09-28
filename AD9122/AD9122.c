@@ -697,8 +697,6 @@ int32_t ad9122_offset_I_DAC(int32_t offset)
 		ad9122_write(AD9122_REG_I_DAC_OFFSET_LSB, regData1);
 		regData2 = (offset & 0xFF00) >> 8;
 		ad9122_write(AD9122_REG_I_DAC_OFFSET_MSB, regData2);
-
-        offset = (regData1 << 8) + (regData2 << 0);
 	}
     else
     {
@@ -729,8 +727,6 @@ int32_t ad9122_offset_Q_DAC(int32_t offset)
 		ad9122_write(AD9122_REG_Q_DAC_OFFSET_LSB, regData1);
 		regData2 = (offset & 0xFF00) >> 8;
 		ad9122_write(AD9122_REG_Q_DAC_OFFSET_MSB, regData2);
-        
-        offset = (regData1 << 8) + (regData2 << 0);
 	}
     else
     {
@@ -761,8 +757,6 @@ int32_t ad9122_phaseAdj_I_DAC(int32_t phaseAdj)
 		ad9122_write(AD9122_REG_I_PHA_ADJ_LSB, regData1);
 		regData2 = (phaseAdj & 0xFF00) >> 8;
 		ad9122_write(AD9122_REG_I_PHA_ADJ_MSB, regData2);
-
-        phaseAdj = (regData1 << 8) + (regData2 << 0);
 	}
     else
     {
@@ -793,8 +787,6 @@ int32_t ad9122_phaseAdj_Q_DAC(int32_t phaseAdj)
 		ad9122_write(AD9122_REG_Q_PHA_ADJ_LSB, regData1);
 		regData2 = (phaseAdj & 0xFF00) >> 8;
 		ad9122_write(AD9122_REG_Q_PHA_ADJ_MSB, regData2);
-
-        phaseAdj = (regData1 << 8) + (regData2 << 0);
 	}
     else
     {
