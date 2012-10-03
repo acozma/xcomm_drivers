@@ -736,3 +736,24 @@ int32_t ad9643_test_mode(int32_t mode)
     
 	return  mode;
 }
+
+/***************************************************************************//**
+ * @brief Sets the ADC's user test pattern. 
+ *
+ * @param pattern - Buffer holding the user test pattern (8 bytes)
+  *
+ * @return Returns 0 for success or negative error code
+*******************************************************************************/
+int32_t ad9643_user_test_pattern(uint8_t* pattern)
+{
+    int32_t ret, i;
+
+    for(i = 0; i < 8; i++)
+    {
+        ret = ad9643_write(AD9643_REG_USER_TEST_PATTERN_1LSB + i, pattern[i]);
+		if(ret < 0)
+            break;
+    }
+
+    return ret;
+}

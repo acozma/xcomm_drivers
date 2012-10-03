@@ -192,5 +192,7 @@ int32_t ad9643_dco_output_clock_delay(int32_t delay);
 int32_t ad9643_input_span(int32_t span);
 /** Sets the ADC's test mode. Returns the set test mode. */
 int32_t ad9643_test_mode(int32_t mode);
+/** Sets the ADC's user test pattern. */
+int32_t ad9643_user_test_pattern(uint8_t* pattern);
 
 #endif /* __AD9643_H__ */

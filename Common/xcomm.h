@@ -229,6 +229,11 @@ XCOMM_AdcTestMode XCOMM_SetAdcTestMode(XCOMM_AdcTestMode testMode);
 /*  ** if error,return -1 */
 XCOMM_AdcTestMode XCOMM_GetAdcTestMode(XCOMM_ReadMode readMode);
 
+/** Sets the user test pattern of the ADC */
+/*  ** pattern: buffer containing the test pattern (8 bytes) */
+/*  ** if success, returns 0 */
+/*  ** if error,return -1 */
+int32_t XCOMM_SetAdcUserTestPattern(uint8_t* pattern);
 
 /************************ DAC Functions *****************************/
 
