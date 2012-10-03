@@ -328,7 +328,9 @@ int32_t ad9523_read_raw(int32_t channel,
  *						  CHAN_INFO_FREQUENCY
  *						  CHAN_INFO_PHASE
  *
- * @return Returns 0 in case of success or negative error code.
+ * @return Returns 0 in case of success or negative error code. 
+ *         When setting the frequency the returned value is the set frequency 
+ *         or negative error code.
 *******************************************************************************/
 int32_t ad9523_write_raw(int32_t channel,
                          int32_t val,
@@ -338,6 +340,7 @@ int32_t ad9523_write_raw(int32_t channel,
 	struct ad9523_state *st = &ad9523_st;
 	uint32_t reg;
 	int32_t ret, tmp, code;
+    int32_t ret_val = 0;
 
 	ret = ad9523_read(AD9523_CHANNEL_CLOCK_DIST(channel));
 	if (ret < 0)
@@ -362,7 +365,8 @@ int32_t ad9523_write_raw(int32_t channel,
 			goto out;
 		tmp = st->vco_out_freq[st->vco_out_map[channel]] / val;
 		tmp = tmp < 1 ? 1 : tmp > 1024 ? 1024 : tmp;
-		reg &= ~(0x3FF << 8);
+		ret_val = st->vco_out_freq[st->vco_out_map[channel]] / tmp;
+        reg &= ~(0x3FF << 8);
 		reg |= AD9523_CLK_DIST_DIV(tmp);
 		break;
 	case CHAN_INFO_PHASE:
@@ -377,15 +381,14 @@ int32_t ad9523_write_raw(int32_t channel,
 		goto out;
 	}
 
-	ret = ad9523_write(AD9523_CHANNEL_CLOCK_DIST(channel),
-			   reg);
+	ret = ad9523_write(AD9523_CHANNEL_CLOCK_DIST(channel), reg);
 	if (ret < 0)
 		goto out;
 
 	ad9523_io_update();
 out:
 
-	return ret;
+	return ret < 0 ? ret : ret_val;
 }
 
 /***************************************************************************//**
@@ -480,7 +483,7 @@ int64_t ad9523_out_frequency(int32_t channel, int64_t Hz)
         if(ret < 0)
             return ret;
         
-        ret_freq = (int32_t)Hz;
+        ret_freq = (int32_t)ret;
     }
     else
     {
