@@ -364,6 +364,9 @@ int32_t ad9523_write_raw(int32_t channel,
 		if (ret < 0)
 			goto out;
 		tmp = st->vco_out_freq[st->vco_out_map[channel]] / val;
+		if((st->vco_out_freq[st->vco_out_map[channel]] / tmp - val) >
+		   (val - st->vco_out_freq[st->vco_out_map[channel]] / (tmp + 1)))
+		   tmp++;
 		tmp = tmp < 1 ? 1 : tmp > 1024 ? 1024 : tmp;
 		ret_val = st->vco_out_freq[st->vco_out_map[channel]] / tmp;
         reg &= ~(0x3FF << 8);
