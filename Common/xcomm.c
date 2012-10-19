@@ -831,9 +831,6 @@ XCOMM_DacIQCorrection XCOMM_SetDacIqCorrection(XCOMM_DacIQCorrection daciqCorrec
 ******************************************************************************/
 XCOMM_DacIQCorrection XCOMM_GetDacIqCorrection(XCOMM_ReadMode readMode)
 {
-    
-    int32_t ret = 0;
-
     if(readMode == XCOMM_ReadMode_FromHW)
     {
         XCOMM_State.dacIQCorrection.fsAdjI = ad9122_fs_adj_I_DAC(INT32_MAX);
