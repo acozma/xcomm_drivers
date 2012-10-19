@@ -120,8 +120,8 @@
 #define AD9643_TEST_MODE_POSITIVE_FS                0x02
 #define AD9643_TEST_MODE_NEGATIVE_FS                0x03
 #define AD9643_TEST_MODE_ALTERNATING_CHECKERBOARD   0x04
-#define AD9643_TEST_MODE_PN_LONG_SEQ                0x05
-#define AD9643_TEST_MODE_PN_SHORT_SEQ               0x06
+#define AD9643_TEST_MODE_PN23_SEQ                	0x05
+#define AD9643_TEST_MODE_PN9_SEQ               		0x06
 #define AD9643_TEST_MODE_ONE_ZERO_TOGGLE            0x07
 #define AD9643_TEST_MODE_USER_MODE                  0x08
 #define AD9643_TEST_MODE_RAMP                       0x0F

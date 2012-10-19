@@ -45,6 +45,11 @@
 /******************************************************************************/
 #include "spi_interface.h"
 #include "AD9643.h"
+#include "xil_io.h"
+#include "xparameters.h"
+#include "cf_axi_adc.h"
+
+extern void msleep(uint32_t ms_count);
 
 /**************************************************************************//**
 * @brief Writes data into a register
@@ -78,22 +83,169 @@ int32_t ad9643_read(uint32_t regAddr)
 }
 
 /***************************************************************************//**
+ * @brief Sets the AD9643 test mode for DCO delay calibration
+ *
+ * @param chan_mask - Selects the internal ADC the command is applied to.
+ * @param mode - ADC test mode
+ *
+ * @return Negative error code or 0 in case of success.
+*******************************************************************************/
+int32_t ad9643_testmode_set(uint32_t chan_mask, uint32_t mode)
+{
+	int32_t ret = 0;
+
+	switch (mode)
+	{
+	case AD9643_TEST_MODE_PN23_SEQ:
+	case AD9643_TEST_MODE_PN9_SEQ:
+	case AD9643_TEST_MODE_ALTERNATING_CHECKERBOARD:
+		Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_CTRL, 0);
+		ret = ad9643_write(ADC_REG_OUTPUT_MODE,
+			        	  (AD9643_DEF_OUTPUT_MODE | OUTPUT_MODE_TWOS_COMPLEMENT) &
+			        	  ~OUTPUT_MODE_TWOS_COMPLEMENT);
+		break;
+	default:
+		Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_CTRL, AXIADC_SIGNEXTEND);
+		ret = ad9643_write(ADC_REG_OUTPUT_MODE, (AD9643_DEF_OUTPUT_MODE |
+                                           	   	 OUTPUT_MODE_TWOS_COMPLEMENT));
+	};
+	if(ret < 0)
+		return ret;
+
+	ret = ad9643_write(ADC_REG_CHAN_INDEX, chan_mask);
+	if(ret < 0)
+		return ret;
+
+	ret = ad9643_write(ADC_REG_TEST_IO, mode);
+	if(ret < 0)
+		return ret;
+
+	ret = ad9643_write(ADC_REG_CHAN_INDEX, 0x3);
+	if(ret < 0)
+		return ret;
+
+	ret = ad9643_write(ADC_REG_TRANSFER, TRANSFER_SYNC);
+	if(ret < 0)
+		return ret;
+
+	return ret;
+}
+
+/***************************************************************************//**
+ * @brief Calibrates the DCO clock delay
+ *
+ * @return Negative error code or 0 in case of success.
+*******************************************************************************/
+int32_t ad9643_dco_calibrate_2c()
+{
+	int32_t dco, ret, cnt, start, max_start, max_cnt;
+	uint32_t stat;
+	uint8_t err_field[33];
+
+	ad9643_testmode_set(0x2, AD9643_TEST_MODE_PN23_SEQ);
+	ad9643_testmode_set(0x1, AD9643_TEST_MODE_PN9_SEQ);
+
+	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_PN_ERR_CTRL,
+			  AXIADC_PN23_1_EN | AXIADC_PN9_0_EN);
+
+	for(dco = 0; dco <= 32; dco++)
+    {
+		ret = 0;
+		ad9643_write(ADC_REG_OUTPUT_DELAY, dco > 0 ? ((dco - 1) | 0x80) : 0);
+		ad9643_write(ADC_REG_TRANSFER, TRANSFER_SYNC);
+		Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_STAT,
+                  AXIADC_PCORE_ADC_STAT_MASK);
+
+		cnt = 4;
+
+		do {
+			msleep(8);
+			stat = Xil_In32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_STAT);
+			if ((cnt-- < 0) | (stat & (AXIADC_PCORE_ADC_STAT_PN_ERR0 |
+				AXIADC_PCORE_ADC_STAT_PN_ERR1))) {
+				ret = -1;
+				break;
+			}
+		} while (stat & (AXIADC_PCORE_ADC_STAT_PN_OOS0 |
+			             AXIADC_PCORE_ADC_STAT_PN_OOS1));
+
+		cnt = 4;
+
+		if (!ret)
+			do {
+				msleep(4);
+				stat = Xil_In32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_STAT);
+				if (stat & (AXIADC_PCORE_ADC_STAT_PN_ERR0 |
+					        AXIADC_PCORE_ADC_STAT_PN_ERR1)) {
+					ret = -1;
+					break;
+				}
+			} while (cnt--);
+
+		err_field[dco] = !!ret;
+	}
+
+	for(dco = 0, cnt = 0, max_cnt = 0, start = -1, max_start = 0;
+		dco <= 32; dco++) {
+		if (err_field[dco] == 0) {
+			if (start == -1)
+				start = dco;
+			cnt++;
+		} else {
+			if (cnt > max_cnt) {
+				max_cnt = cnt;
+				max_start = start;
+			}
+			start = -1;
+			cnt = 0;
+		}
+	}
+
+	if (cnt > max_cnt) {
+		max_cnt = cnt;
+		max_start = start;
+	}
+
+	dco = max_start + (max_cnt / 2);
+
+	ad9643_testmode_set(0x3, AD9643_TEST_MODE_OFF);
+	ad9643_write(ADC_REG_OUTPUT_DELAY,
+		         dco > 0 ? ((dco - 1) | 0x80) : 0);
+	ad9643_write(ADC_REG_TRANSFER, TRANSFER_SYNC);
+
+#ifdef DCO_DEBUG
+	for(cnt = 0; cnt <= 32; cnt++)
+		if (cnt == dco)
+			xil_printf("|");
+		else
+			xil_printf("%c", err_field[cnt] ? '-' : 'o');
+	xil_printf(" DCO 0x%X\n", dco > 0 ? ((dco - 1) | 0x80) : 0);
+#endif
+
+	return 0;
+}
+
+/***************************************************************************//**
  * @brief Initializes the AD9643. 
  *
  * @return Negative error code or 0 in case of success.
 *******************************************************************************/
 int32_t ad9643_setup()
 {
-    ad9643_write(AD9643_REG_CHANNEL_IDX, AD9643_CHANNEL_IDX_ADC_A |
-                                         AD9643_CHANNEL_IDX_ADC_B);
-    ad9643_dco_clock_mode(0x01);
-	ad9643_dco_output_clock_delay(1000);
-
-    ad9643_write(AD9643_REG_TEST_MODE, 0x00);
-    ad9643_write(AD9643_REG_OUTPUT_MODE, AD9643_OUTPUT_MODE_OUTPUT_FORMAT(0x01));
-    ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
-    ad9643_write(AD9643_REG_TRANSFER, 0x00);
+	ad9643_write(ADC_REG_OUTPUT_PHASE, OUTPUT_EVEN_ODD_MODE_EN);
+	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_CTRL,
+			  AXIADC_SIGNEXTEND | AXIADC_SCALE_OFFSET_EN);
+	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_CA_OFFS_SCALE,
+			  AXIADC_OFFSET(0) | AXIADC_SCALE(0x8000));
+	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_CB_OFFS_SCALE,
+			  AXIADC_OFFSET(0) | AXIADC_SCALE(0x8000));
+	ad9643_write(ADC_REG_OUTPUT_MODE, AD9643_DEF_OUTPUT_MODE | OUTPUT_MODE_TWOS_COMPLEMENT);
+	ad9643_write(ADC_REG_TEST_IO, TESTMODE_OFF);
+	ad9643_write(ADC_REG_TRANSFER, TRANSFER_SYNC);
+	ad9643_dco_calibrate_2c();
 	
+	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_DMA_CHAN_SEL, 0x02);
+
 	return 0;
 }
 
@@ -587,8 +739,8 @@ int32_t ad9643_dco_clock_invert(int32_t invert)
  * @brief Enables (0) or disables (1) the even/odd mode output.
  *
  * @param mode - The even/odd mode output.
- *				 Example: 0 - Enables the even/odd mode output;
- *						  1 - Disables the even/odd mode output.
+ *				 Example: 1 - Enables the even/odd mode output;
+ *						  0 - Disables the even/odd mode output.
  *
  * @return The set clock mode or negative error code
 *******************************************************************************/

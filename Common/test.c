@@ -255,6 +255,8 @@ void adc_test(uint32_t sel, uint32_t mode, uint32_t format)
 	uint32_t edata;
 	uint32_t baddr;
 
+	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + 0x2C, 0);
+
 	baddr = (sel == IICSEL_B1HPC) ? CFAD9643_1_BASEADDR : CFAD9643_0_BASEADDR;
 	adc_capture(sel, 16, DDR_BASEADDR);
 	delay_ms(10);
@@ -283,14 +285,14 @@ void adc_test(uint32_t sel, uint32_t mode, uint32_t format)
 				xil_printf("  ERROR[%2d]: rcv(%08x), exp(%08x)\n\r", n, rdata, edata);
 			}
 		}
-		return;
+		goto end;
 	}
 
 	/* PnLongSeq or PnShortSeq */
 	if ((mode == 0x5) || (mode == 0x6))
 	{
 		if (format == 0x1)
-			return;
+			goto end;
 		Xil_Out32((baddr+0x24), ((mode == 0x5) ? 0x3 : 0x0));
 		delay_ms(10);
 		Xil_Out32((baddr+0x14), 0xff);
@@ -299,7 +301,7 @@ void adc_test(uint32_t sel, uint32_t mode, uint32_t format)
 		{
 			xil_printf("  ERROR: PN status(%02x).\n\r", Xil_In32(baddr+0x14));
 		}
-		return;
+		goto end;
 	}
 
 	/* One Zero Toggle */
@@ -324,7 +326,7 @@ void adc_test(uint32_t sel, uint32_t mode, uint32_t format)
 				xil_printf("  ERROR[%2d]: rcv(%08x), exp(%08x)\n\r", n, rdata, edata);
 			}
 		}
-		return;
+		goto end;
 	}
 
 	/* Ramp */
@@ -349,7 +351,7 @@ void adc_test(uint32_t sel, uint32_t mode, uint32_t format)
 				xil_printf("  ERROR[%2d]: rcv(%08x), exp(%08x)\n\r", n, rdata, edata);
 			}
 		}
-		return;
+		goto end;
 	}
 
 	/* MidscaleShort, PositiveFs, NegativeFs */
@@ -374,4 +376,6 @@ void adc_test(uint32_t sel, uint32_t mode, uint32_t format)
 			xil_printf("  ERROR[%2d]: rcv(%08x), exp(%08x)\n\r", n, rdata, edata);
 		}
 	}
+end:
+	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + 0x2C, 0x02);
 }
