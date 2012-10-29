@@ -44,10 +44,8 @@
 /***************************** Include Files **********************************/
 /******************************************************************************/
 #include "spi_interface.h"
+#include "adc_core.h"
 #include "AD9643.h"
-#include "xil_io.h"
-#include "xparameters.h"
-#include "cf_axi_adc.h"
 
 extern void msleep(uint32_t ms_count);
 
@@ -99,32 +97,32 @@ int32_t ad9643_testmode_set(uint32_t chan_mask, uint32_t mode)
 	case AD9643_TEST_MODE_PN23_SEQ:
 	case AD9643_TEST_MODE_PN9_SEQ:
 	case AD9643_TEST_MODE_ALTERNATING_CHECKERBOARD:
-		Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_CTRL, 0);
-		ret = ad9643_write(ADC_REG_OUTPUT_MODE,
-			        	  (AD9643_DEF_OUTPUT_MODE | OUTPUT_MODE_TWOS_COMPLEMENT) &
-			        	  ~OUTPUT_MODE_TWOS_COMPLEMENT);
+        ADC_Core_Write(ADC_CORE_ADC_CTRL,0);
+		ret = ad9643_write(AD9643_REG_OUTPUT_MODE,
+			        	  (AD9643_OUTPUT_MODE_DEF | AD9643_OUTPUT_MODE_TWOS_COMPLEMENT) &
+			        	  ~AD9643_OUTPUT_MODE_TWOS_COMPLEMENT);
 		break;
 	default:
-		Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_CTRL, AXIADC_SIGNEXTEND);
-		ret = ad9643_write(ADC_REG_OUTPUT_MODE, (AD9643_DEF_OUTPUT_MODE |
-                                           	   	 OUTPUT_MODE_TWOS_COMPLEMENT));
+        ADC_Core_Write(ADC_CORE_ADC_CTRL,ADC_CORE_SIGNEXTEND);
+		ret = ad9643_write(AD9643_REG_OUTPUT_MODE, (AD9643_OUTPUT_MODE_DEF |
+                                           	   	 AD9643_OUTPUT_MODE_TWOS_COMPLEMENT));
 	};
 	if(ret < 0)
 		return ret;
 
-	ret = ad9643_write(ADC_REG_CHAN_INDEX, chan_mask);
+	ret = ad9643_write(AD9643_REG_CHANNEL_IDX, chan_mask);
 	if(ret < 0)
 		return ret;
 
-	ret = ad9643_write(ADC_REG_TEST_IO, mode);
+	ret = ad9643_write(AD9643_REG_TEST_MODE, mode);
 	if(ret < 0)
 		return ret;
 
-	ret = ad9643_write(ADC_REG_CHAN_INDEX, 0x3);
+	ret = ad9643_write(AD9643_REG_CHANNEL_IDX, 0x3);
 	if(ret < 0)
 		return ret;
 
-	ret = ad9643_write(ADC_REG_TRANSFER, TRANSFER_SYNC);
+	ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
 	if(ret < 0)
 		return ret;
 
@@ -145,38 +143,35 @@ int32_t ad9643_dco_calibrate_2c()
 	ad9643_testmode_set(0x2, AD9643_TEST_MODE_PN23_SEQ);
 	ad9643_testmode_set(0x1, AD9643_TEST_MODE_PN9_SEQ);
 
-	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_PN_ERR_CTRL,
-			  AXIADC_PN23_1_EN | AXIADC_PN9_0_EN);
+    ADC_Core_Write(ADC_CORE_PN_ERR_CTRL, ADC_CORE_PN23_1_EN | ADC_CORE_PN9_0_EN);
 
 	for(dco = 0; dco <= 32; dco++)
     {
 		ret = 0;
-		ad9643_write(ADC_REG_OUTPUT_DELAY, dco > 0 ? ((dco - 1) | 0x80) : 0);
-		ad9643_write(ADC_REG_TRANSFER, TRANSFER_SYNC);
-		Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_STAT,
-                  AXIADC_PCORE_ADC_STAT_MASK);
-
+		ad9643_write(AD9643_REG_DCO_OUTPUT_DELAY, dco > 0 ? ((dco - 1) | 0x80) : 0);
+		ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        ADC_Core_Write(ADC_CORE_ADC_STAT, ADC_CORE_ADC_STAT_MASK);
 		cnt = 4;
 
 		do {
 			msleep(8);
-			stat = Xil_In32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_STAT);
-			if ((cnt-- < 0) | (stat & (AXIADC_PCORE_ADC_STAT_PN_ERR0 |
-				AXIADC_PCORE_ADC_STAT_PN_ERR1))) {
+            ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
+			if ((cnt-- < 0) | (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
+				ADC_CORE_ADC_STAT_PN_ERR1))) {
 				ret = -1;
 				break;
 			}
-		} while (stat & (AXIADC_PCORE_ADC_STAT_PN_OOS0 |
-			             AXIADC_PCORE_ADC_STAT_PN_OOS1));
+		} while (stat & (ADC_CORE_ADC_STAT_PN_OOS0 |
+			             ADC_CORE_ADC_STAT_PN_OOS1));
 
 		cnt = 4;
 
 		if (!ret)
 			do {
 				msleep(4);
-				stat = Xil_In32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_STAT);
-				if (stat & (AXIADC_PCORE_ADC_STAT_PN_ERR0 |
-					        AXIADC_PCORE_ADC_STAT_PN_ERR1)) {
+                ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
+				if (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
+					        ADC_CORE_ADC_STAT_PN_ERR1)) {
 					ret = -1;
 					break;
 				}
@@ -185,12 +180,14 @@ int32_t ad9643_dco_calibrate_2c()
 		err_field[dco] = !!ret;
 	}
 
+	ret = -1;
 	for(dco = 0, cnt = 0, max_cnt = 0, start = -1, max_start = 0;
 		dco <= 32; dco++) {
 		if (err_field[dco] == 0) {
 			if (start == -1)
 				start = dco;
 			cnt++;
+			ret = 0;
 		} else {
 			if (cnt > max_cnt) {
 				max_cnt = cnt;
@@ -209,20 +206,11 @@ int32_t ad9643_dco_calibrate_2c()
 	dco = max_start + (max_cnt / 2);
 
 	ad9643_testmode_set(0x3, AD9643_TEST_MODE_OFF);
-	ad9643_write(ADC_REG_OUTPUT_DELAY,
+	ad9643_write(AD9643_REG_DCO_OUTPUT_DELAY,
 		         dco > 0 ? ((dco - 1) | 0x80) : 0);
-	ad9643_write(ADC_REG_TRANSFER, TRANSFER_SYNC);
+	ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
 
-#ifdef DCO_DEBUG
-	for(cnt = 0; cnt <= 32; cnt++)
-		if (cnt == dco)
-			xil_printf("|");
-		else
-			xil_printf("%c", err_field[cnt] ? '-' : 'o');
-	xil_printf(" DCO 0x%X\n", dco > 0 ? ((dco - 1) | 0x80) : 0);
-#endif
-
-	return 0;
+	return ret;
 }
 
 /***************************************************************************//**
@@ -232,21 +220,40 @@ int32_t ad9643_dco_calibrate_2c()
 *******************************************************************************/
 int32_t ad9643_setup()
 {
-	ad9643_write(ADC_REG_OUTPUT_PHASE, OUTPUT_EVEN_ODD_MODE_EN);
-	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_ADC_CTRL,
-			  AXIADC_SIGNEXTEND | AXIADC_SCALE_OFFSET_EN);
-	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_CA_OFFS_SCALE,
-			  AXIADC_OFFSET(0) | AXIADC_SCALE(0x8000));
-	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_CB_OFFS_SCALE,
-			  AXIADC_OFFSET(0) | AXIADC_SCALE(0x8000));
-	ad9643_write(ADC_REG_OUTPUT_MODE, AD9643_DEF_OUTPUT_MODE | OUTPUT_MODE_TWOS_COMPLEMENT);
-	ad9643_write(ADC_REG_TEST_IO, TESTMODE_OFF);
-	ad9643_write(ADC_REG_TRANSFER, TRANSFER_SYNC);
-	ad9643_dco_calibrate_2c();
+    int32_t ret = 0;
 	
-	Xil_Out32(XPAR_AXI_ADC_2C_0_BASEADDR + AXIADC_PCORE_DMA_CHAN_SEL, 0x02);
+	ad9643_reset();
+	ad9643_write(AD9643_REG_CLK_PHASE_CTRL, AD9643_CLK_PHASE_CTRL_EVEN_ODD_MODE_EN);
+    ADC_Core_Write(ADC_CORE_ADC_CTRL,ADC_CORE_SIGNEXTEND | ADC_CORE_SCALE_OFFSET_EN);
+    ADC_Core_Write(ADC_CORE_CA_OFFS_SCALE,ADC_CORE_OFFSET(0) | ADC_CORE_SCALE(0x8000));
+    ADC_Core_Write(ADC_CORE_CB_OFFS_SCALE,ADC_CORE_OFFSET(0) | ADC_CORE_SCALE(0x8000));
+	ad9643_write(AD9643_REG_OUTPUT_MODE, AD9643_OUTPUT_MODE_DEF | AD9643_OUTPUT_MODE_TWOS_COMPLEMENT);
+	ad9643_write(AD9643_REG_TEST_MODE, AD9643_TEST_MODE_OFF);
+	ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+	ret = ad9643_dco_calibrate_2c();
+	if(ret)
+	{
+		ad9643_dco_clock_invert(1);
+		ret = ad9643_dco_calibrate_2c();
+	}
 
-	return 0;
+    ADC_Core_Write(ADC_CORE_DMA_CHAN_SEL,0x02);
+
+	return ret;
+}
+
+/***************************************************************************//**
+ * @brief Resets the device.
+ *
+ * @return Returns negative error code or 0 in case of success.
+*******************************************************************************/
+int32_t ad9643_reset(void)
+{
+	int32_t ret;
+
+    ret = ad9643_write(AD9643_REG_SPI_CONFIG, AD9643_SPI_CONFIG_SOFT_RESET);
+
+    return ret;
 }
 
 /***************************************************************************//**

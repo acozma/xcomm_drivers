@@ -134,6 +134,10 @@
 #define AD9643_OFFSET_ADJ(x)    ((x) & 0x3F)
 
 /* OUTPUT_MODE Bit Definitions */
+#define AD9643_OUTPUT_MODE_DEF       		0x00
+#define AD9643_OUTPUT_MODE_OFFSET_BINARY	0x0
+#define AD9643_OUTPUT_MODE_TWOS_COMPLEMENT	0x1
+#define AD9643_OUTPUT_MODE_GRAY_CODE		0x2
 #define AD9643_OUTPUT_MODE_OUTPUT_FORMAT(x) ((x) & 0x03)
 #define AD9643_OUTPUT_MODE_OUTPUT_INVERT    (1 << 2)
 #define AD9643_OUTPUT_MODE_OUTPUT_EN        (1 << 4)
@@ -142,6 +146,7 @@
 #define AD9643_REG_OUTPUT_ADJ_VAL(x) ((x) & 0x0F)
 
 /* CLK_PHASE_CTRL Bit Definitions */
+#define AD9643_CLK_PHASE_CTRL_EVEN_ODD_MODE_EN		0x20
 #define AD9643_CLK_PHASE_CTRL_MODE              (1 << 5)
 #define AD9643_CLK_PHASE_CTRL_INVERT_DCO_CLK    (1 << 7)
 
@@ -162,6 +167,8 @@
 /******************************************************************************/
 /** Initializes the AD9643. */
 int32_t ad9643_setup();
+/** Resets the device. */
+int32_t ad9643_reset();
 /** Configures the external power-down pin function. */
 int32_t ad9643_ext_pwd_pin_fnc(int32_t fnc);
 /** Configures the power mode. */
