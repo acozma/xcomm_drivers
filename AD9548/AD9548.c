@@ -630,6 +630,20 @@ int32_t ad9548_refdd_state()
 }
 
 /***************************************************************************//**
+ * @brief Resets the device.
+ *
+ * @return Returns negative error code or 0 in case of success.
+*******************************************************************************/
+int32_t ad9548_reset(void)
+{
+	int32_t ret;
+
+    ret = ad9548_write(AD9548_REG_SPI_CTRL, 0x30);
+
+    return ret;
+}
+
+/***************************************************************************//**
  * @brief Initializes the AD9548.
  *
  * @return status - Returns 0 in case of success or negative error code.
@@ -645,7 +659,7 @@ int32_t ad9548_setup(void)
     st->pdata = &ad9548_pdata_lpc;
 
 	/* Serial port control and part identification */
-	ret = ad9548_write(AD9548_REG_SPI_CTRL, 0x30);
+	ret = ad9548_reset();
 	if(ret < 0)
         return ret;
     

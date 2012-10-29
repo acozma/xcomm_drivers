@@ -808,6 +808,8 @@ struct ad9548_platform_data
 
 /** Initializes the AD9548. Returns negative error code or 0 in case of success. */
 int32_t ad9548_setup();
+/** Resets the device. */
+int32_t ad9548_reset();
 /** Sets the output frequency for output channel 1.*/
 int64_t ad9548_out_altvoltage0_frequency(int64_t Hz);
 /** Sets the output frequency for output channel 2. */
