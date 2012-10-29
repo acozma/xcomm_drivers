@@ -467,6 +467,8 @@ struct ad9523_platform_data
 /******************************************************************************/
 /** Initializes the AD9523. */
 int32_t ad9523_setup();
+/** Resets the device. */
+int32_t ad9523_reset();
 /** Sets the output frequency for channel 0. */
 int64_t ad9523_out_altvoltage0_ZD_OUTPUT_frequency(int64_t Hz);
 /** Sets the phase for channel 0. */

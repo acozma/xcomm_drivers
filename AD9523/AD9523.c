@@ -886,6 +886,23 @@ int32_t ad9523_vcxo_clk_present()
 }
 
 /***************************************************************************//**
+ * @brief Resets the device.
+ *
+ * @return Returns negative error code or 0 in case of success.
+*******************************************************************************/
+int32_t ad9523_reset(void)
+{
+	int32_t ret;
+
+	ret = ad9523_write(AD9523_SERIAL_PORT_CONFIG,
+			           AD9523_SER_CONF_SOFT_RESET |
+			           (AD9523_SPI_3_WIRE ? 0 :
+			           AD9523_SER_CONF_SDO_ACTIVE));
+
+    return ret;
+}
+
+/***************************************************************************//**
  * @brief Initializes the AD9523.
  *
  * @return Returns 0 in case of success or negative error code.
@@ -898,10 +915,8 @@ int32_t ad9523_setup()
 	uint32_t active_mask = 0;
 	int32_t ret, i;
 
-	ret = ad9523_write(AD9523_SERIAL_PORT_CONFIG,
-			           AD9523_SER_CONF_SOFT_RESET |
-			           (AD9523_SPI_3_WIRE ? 0 :
-			           AD9523_SER_CONF_SDO_ACTIVE));
+	ret = ad9523_reset();
+
 	if (ret < 0)
 		return ret;
 
