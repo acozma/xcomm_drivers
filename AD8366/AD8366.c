@@ -112,15 +112,13 @@ int32_t ad8366_write(uint8_t chAgain, uint8_t chBgain)
  * @brief Reads data from the AD8366
  *
  * @param channel - channel number (0 or 1)
- * @param val - pointer to store the first 32 bits of data
- * @param val2 - pointer to store the last 32 bits of data
+ * @param val1000 - pointer to store the data x1000
  * @param m - the code of the data to read
  *
  * @return Returns 0 in case of success or negative error code
 *******************************************************************************/
 int32_t ad8366_read_raw(int32_t channel,
-			        int32_t *val,
-			        int32_t *val2,
+			        int32_t *val1000,
 			        int32_t m)
 {
 	struct ad8366_state *st = &ad8366_st;
@@ -133,10 +131,7 @@ int32_t ad8366_read_raw(int32_t channel,
 		code = st->ch[channel];
 
 		/* Values in dB */
-		code = code * 253 + 4500;
-		*val = code / 1000;
-		*val2 = (code % 1000) * 1000;
-
+		val1000 = code * 253 + 4500;
 		ret = 0;
 		break;
 	default:
@@ -150,15 +145,13 @@ int32_t ad8366_read_raw(int32_t channel,
  * @brief Writes data to the AD8366
  *
  * @param channel - channel number (0 or 1)
- * @param val - the first 32 bits of data to write
- * @param val2 - the last 32 bits of data to write
+ * @param val1000 - the value to write x1000 
  * @param m - the code of the data to write
  *
  * @return Returns 0 in case of success or negative error code
 *******************************************************************************/
 static int32_t ad8366_write_raw(int32_t channel,
-			                int32_t val,
-			                int32_t val2,
+			                int32_t val1000,
 			                long mask)
 {
 	struct ad8366_state *st = &ad8366_st;
@@ -166,12 +159,15 @@ static int32_t ad8366_write_raw(int32_t channel,
 	int32_t ret;
 
 	/* Values in dB */
-	code = (((uint32_t)val * 1000) + ((uint32_t)val2 / 1000));
-
-	if (code > 20500 || code < 4500)
+	if (val1000 > AD8366_MAX_GAIN || val1000 < AD8366_MIN_GAIN)
 		return -1;
 
-	code = (code - 4500) / 253;
+	code = (val1000 - 4500) / 253;
+
+    if((val1000 - 4500 + code*253) > (4500 + (code+1)*253 - val1000))
+    {
+        code++;
+    }
 
 	switch (mask) 
     {
@@ -193,51 +189,47 @@ static int32_t ad8366_write_raw(int32_t channel,
  *
  * @return Returns the actual set gain * 1000 or negative error code
 *******************************************************************************/
-int32_t ad8366_out_voltage0_hardwaregain(int32_t gain_dB)
+int32_t ad8366_out_voltage0_hardwaregain(int32_t gain1000_dB)
 {
     int32_t ret;
-    int32_t intPart;
-    int32_t fracPart;
+    int32_t act_gain1000;
 
-    if((gain_dB <= (AD8366_MAX_GAIN * 1000)) && (gain_dB >= (AD8366_MIN_GAIN * 1000)))
+    if((gain1000_dB <= AD8366_MAX_GAIN) && (gain1000_dB >= AD8366_MIN_GAIN))
     {
-        ret = ad8366_write_raw(0, gain_dB / 1000, 
-                              (gain_dB % 1000) * 1000, 0);
+        ret = ad8366_write_raw(0, gain1000_dB, 0);
         if(ret < 0)
             return -1;
     }
 
-    ret = ad8366_read_raw(0, &intPart, &fracPart, 0);
+    ret = ad8366_read_raw(0, &act_gain1000, 0);
     if(ret < 0)
         return -1;
     
-    return ((intPart * 1000) + (fracPart / 1000));
+    return act_gain1000;
 }
 
 /***************************************************************************//**
  * @brief Sets the gain of channel B.
  *
- * @param gain_dB - the gain to be set in dB * 1000
+ * @param gain1000_dB - the gain to be set in dB * 1000
  *
  * @return Returns the actual set gain * 1000 or negative error code
 *******************************************************************************/
-int32_t ad8366_out_voltage1_hardwaregain(int32_t gain_dB)
+int32_t ad8366_out_voltage1_hardwaregain(int32_t gain1000_dB)
 {
 	int32_t ret;
-	int32_t intPart;
-	int32_t fracPart;
+	int32_t act_gain1000;
 
-    if((gain_dB <= (AD8366_MAX_GAIN * 1000)) && (gain_dB >= (AD8366_MIN_GAIN * 1000)))
+    if((gain1000_dB <= AD8366_MAX_GAIN) && (gain1000_dB >= AD8366_MIN_GAIN))
     {
-        ret = ad8366_write_raw(1, gain_dB / 1000, 
-                              (gain_dB % 1000) * 1000, 0);
+        ret = ad8366_write_raw(1, gain1000_dB, 0);
         if(ret < 0)
             return -1;
     }
 
-    ret = ad8366_read_raw(1, &intPart, &fracPart, 0);
+    ret = ad8366_read_raw(1, &act_gain1000, 0);
     if(ret < 0)
         return -1;
     
-    return ((intPart * 1000) + (fracPart / 1000));
+    return act_gain1000;
 }
