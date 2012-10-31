@@ -131,7 +131,7 @@ int32_t ad8366_read_raw(int32_t channel,
 		code = st->ch[channel];
 
 		/* Values in dB */
-		val1000 = code * 253 + 4500;
+		*val1000 = code * 253 + 4500;
 		ret = 0;
 		break;
 	default:
