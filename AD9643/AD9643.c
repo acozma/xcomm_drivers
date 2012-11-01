@@ -154,7 +154,7 @@ int32_t ad9643_dco_calibrate_2c()
 		cnt = 4;
 
 		do {
-			msleep(8);
+			//msleep(8);
             ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
 			if ((cnt-- < 0) | (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
 				ADC_CORE_ADC_STAT_PN_ERR1))) {
@@ -168,7 +168,7 @@ int32_t ad9643_dco_calibrate_2c()
 
 		if (!ret)
 			do {
-				msleep(4);
+				//msleep(4);
                 ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
 				if (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
 					        ADC_CORE_ADC_STAT_PN_ERR1)) {
