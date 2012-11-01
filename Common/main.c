@@ -55,11 +55,13 @@ int main()
 {
     int ret;
     int mode = 0;
-    float gain = 20.0f;
+	XCOMM_DefaultInit defInit = {100000000,		//adcSamplingRate
+								 100000000,		//dacSamplingRate
+								 20000,			//rxGain1000
+								 2400000000ull, //rxFrequency
+								 2400000000ull};//rxFrequency
     float retGain;
-    uint64_t freqRx = 2400000000ull;
     uint64_t retFreqRx;
-    uint64_t freqTx = 2400000000ull;
     uint64_t retFreqTx;
 
     init_platform();
@@ -67,7 +69,7 @@ int main()
     xil_printf("Running XCOMM Test Program\n\r");
 
     xil_printf("\n\rInitializing XCOMM Components...\n\r");
-    ret = XCOMM_Init();
+    ret = XCOMM_Init(&defInit);
 	if(ret < 0)
 	{
 		xil_printf("XCOMM Init Failed!\n\r");
@@ -95,15 +97,15 @@ int main()
     xil_printf("DAC test complete.\n\r");
 
 	xil_printf("\n\rSetting the VGA gain to: %d.%d dB\n\r", (int)gain, (int)((gain - (int)gain) * 100));
-	retGain = (float)XCOMM_SetRxGain((uint32_t)(gain*1000.0f)) / 1000.0f;
+	retGain = (float)XCOMM_SetRxGain(defInit.rxGain1000) / 1000.0f;
 	xil_printf("Actual set VGA gain: %d.%d dB\n\r", (int)retGain, (int)((retGain - (int)retGain) * 100));
 
 	xil_printf("\n\rSetting the Rx frequency to: %lld%06lld\n\r", freqRx/(uint64_t)1e6, freqRx%(uint64_t)1e6);
-    retFreqRx = XCOMM_SetRxFrequency(freqRx);
+    retFreqRx = XCOMM_SetRxFrequency(defInit.rxFrequency);
     xil_printf("Actual set Rx frequency: %lld%06lld\n\r", retFreqRx/(uint64_t)1e6, retFreqRx%(uint64_t)1e6);
 
 	xil_printf("\n\rSetting the Tx frequency to: %lld%06lld\n\r", freqTx/(uint64_t)1e6, freqTx%(uint64_t)1e6);
-    retFreqTx = XCOMM_SetTxFrequency(freqTx);
+    retFreqTx = XCOMM_SetTxFrequency(defInit.txFrequency);
     xil_printf("Actual set Tx frequency: %lld%06lld\n\r", retFreqTx/(uint64_t)1e6, retFreqTx%(uint64_t)1e6);
 
     xil_printf("\n\rSetting up the DDS... \n\r");

@@ -104,8 +104,18 @@ typedef struct
     int16_t     offsetQ; 
     int32_t     error;
 }XCOMM_RxIQCorrection;
-
 typedef XCOMM_TxIQCorrection XCOMM_DacIQCorrection;
+
+/** XCOMM Default Initialization Structure */
+typedef struct 
+{	
+	uint64_t	adcSamplingRate;
+	uint64_t	dacSamplingRate;
+	int32_t		rxGain1000;
+	uint64_t	rxFrequency;
+	uint64_t	txFrequency;
+}XCOMM_DefaultInit;
+
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
 /*****************************************************************************/
@@ -113,7 +123,7 @@ typedef XCOMM_TxIQCorrection XCOMM_DacIQCorrection;
 /** Initializes the XCOMM board */
 /*  ** if success, return 0 */
 /*  ** if error, return -1 */
-int32_t XCOMM_Init(void);
+int32_t XCOMM_Init(XCOMM_DefaultInit* pDefInit);
 
 /** Resync driver cached values by reading the XCOMM board */
 /*  ** if success, return 0 */
@@ -234,6 +244,11 @@ XCOMM_AdcTestMode XCOMM_GetAdcTestMode(XCOMM_ReadMode readMode);
 /*  ** if success, returns 0 */
 /*  ** if error,return -1 */
 int32_t XCOMM_SetAdcUserTestPattern(uint8_t* pattern);
+
+/** Calibrates the ADC DCO clock delay */
+/*  ** if success, returns 0 */
+/*  ** if error,return -1 */
+int32_t XCOMM_CalibrateAdcDco(void);
 
 /************************ DAC Functions *****************************/
 

@@ -53,6 +53,7 @@
 #include "AD8366.h"
 #include "eeprom.h"
 #include "spi_interface.h"
+#include "adc_core.h"
 #include "xcomm.h"
 
 /****** Global variables ******/
@@ -101,10 +102,12 @@ struct stXCOMM_State
 /**************************************************************************//**
 * @brief Initializes the XCOMM board
 *
+* @param pDefInit - pointer to initialization structure
+*
 * @return If success, return 0
 *         if error, return -1
 ******************************************************************************/
-int32_t XCOMM_Init()
+int32_t XCOMM_Init(XCOMM_DefaultInit* pDefInit)
 {
     int ret = 0;
 
@@ -121,40 +124,60 @@ int32_t XCOMM_Init()
     if(ret < 0)
     	return -1;
 
-    /* Initialize the XCOMM components */
+    /* Initialize the AD9548 */
     ret = ad9548_setup();
     if(ret < 0)
         return -1;
 
+	/* Initialize the AD9523 */
     ret = ad9523_setup();
     if(ret < 0)
         return -1;
-
+	ret = (int32_t)XCOMM_SetAdcSamplingRate(pDefInit->adcSamplingRate);
+	if(ret < 0)
+        return -1;
+	ret = (int32_t)XCOMM_SetDacSamplingRate(pDefInit->dacSamplingRate);
+	if(ret < 0)
+        return -1;
+	
+	/* Initialize the Rx ADF4351 */
     ret = adf4351_setup(ADF4351_RX_CHANNEL);
     if(ret < 0)
         return -1;
+	ret = (int32_t)XCOMM_SetRxFrequency(pDefInit->rxFrequency);
+	if(ret < 0)
+        return -1;
 
+	/* Initialize the Tx ADF4351 */
     ret = adf4351_setup(ADF4351_TX_CHANNEL);
     if(ret < 0)
         return -1;
+	ret = (int32_t)XCOMM_SetTxFrequency(pDefInit->txFrequency);
+	if(ret < 0)
+        return -1;
     
+	/* Initialize the AD9122 */
     ret = ad9122_setup();
     if(ret < 0)
         return -1;
 
+	/* Initialize the AD9643 */
     ret = ad9643_setup();
     if(ret < 0)
         return -1;
 
+	/* Initialize the AD8366 */
     ret = ad8366_setup();
     if(ret < 0)
         return -1;
+	ret = XCOMM_SetRxGain(pDefInit->rxGain1000);
+	if(ret < 0)
+        return -1;
 
-    ///* Read the calibration data from the EEPROM */
+    /* Read the calibration data from the EEPROM */
     ret = EEPROM_GetCalData((uint8_t*)XCOMM_calData, &XCOMM_calDataSize);
     if(ret < 0)
         return -1;
-
 
     return ret;
 }
@@ -745,6 +768,32 @@ int32_t XCOMM_SetAdcUserTestPattern(uint8_t* pattern)
 
     return ret;
 }
+
+/**************************************************************************//**
+* @brief Calibrates the ADC DCO clock delay 
+* 
+* @return If success, returns 0 
+*		  if error,return -1
+******************************************************************************/
+int32_t XCOMM_CalibrateAdcDco(void)
+{
+	int32_t ret;
+
+	ADC_Core_Write(ADC_CORE_DMA_CHAN_SEL,0x00);
+
+	ad9643_dco_clock_invert(0);
+	ret = ad9643_dco_calibrate_2c();
+	if(ret)
+	{
+		ad9643_dco_clock_invert(1);
+		ret = ad9643_dco_calibrate_2c();
+	}
+
+	ADC_Core_Write(ADC_CORE_DMA_CHAN_SEL,0x02);
+
+	return ret;
+}
+
 
 /************************ DAC Functions **************************************/
 
