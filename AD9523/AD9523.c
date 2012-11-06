@@ -90,7 +90,7 @@ enum
 };
 
 /* Platform dependent sleep function */
-extern void msleep(uint32_t ms_count);
+extern void usleep(uint32_t us_count);
 
 /* Helpers to avoid excess line breaks */
 #define AD_IFE(_pde, _a, _b) ((pdata->_pde) ? _a : _b)
@@ -414,7 +414,7 @@ int32_t ad9523_store_eeprom()
 
 	tmp = 4;
 	do {
-		msleep(16);
+		usleep(16000);
 		ret = ad9523_read(AD9523_EEPROM_DATA_XFER_STATUS);
 		if (ret < 0)
 			return ret;
