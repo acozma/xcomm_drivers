@@ -57,7 +57,7 @@ static const stDevConfig devConfig[] =
         8, 8, 
         (SPI_4_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
         SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
-        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_64),
+        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_AD9122)
     },
     /* AD9643 */
@@ -65,7 +65,7 @@ static const stDevConfig devConfig[] =
         16, 8, 
         (SPI_3_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
         SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
-        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_64),
+        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_AD9643)
     },
     /* AD9548 */
@@ -73,7 +73,7 @@ static const stDevConfig devConfig[] =
         16, 8, 
         (SPI_3_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
         SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
-        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_64),
+        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_AD9548)
     },
     /* AD9523 */
@@ -81,7 +81,7 @@ static const stDevConfig devConfig[] =
         16, 8, 
         (SPI_3_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
         SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
-        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_64),
+        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_AD9523)
     },
     /* ADF4351_TX */
@@ -89,7 +89,7 @@ static const stDevConfig devConfig[] =
         0, 32, 
         (SPI_4_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
         SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
-        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_64),
+        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_ADF4351_TX)
     },
     /* ADF4351_RX */
@@ -97,7 +97,7 @@ static const stDevConfig devConfig[] =
         0, 32, 
         (SPI_4_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
         SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
-        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_64),
+        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_ADF4351_RX)
     },
     /* AD8366_TX */
@@ -105,7 +105,7 @@ static const stDevConfig devConfig[] =
         0, 16, 
         (SPI_4_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
         SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
-        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_64),
+        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_AD8366)
     }
 };
