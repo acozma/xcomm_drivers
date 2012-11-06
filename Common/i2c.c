@@ -71,15 +71,15 @@
 /*****************************************************************************/
 
 /**************************************************************************//**
-* @brief Delays the program execution with the specified number of ms.
+* @brief Delays the program execution with the specified number of us.
 *
-* @param ns_count Number of ms with which the program must be delayed.
+* @param us_count Number of us with which the program must be delayed.
 * @return None.
 ******************************************************************************/
-void msleep(uint32_t ms_count)
+void usleep(uint32_t us_count)
 {
 	uint32_t count;
-	for (count = 0; count < ((ms_count * 100000) + 1); count++);
+	for (count = 0; count < ((us_count * 1000) + 1); count++);
 }
 
 /**************************************************************************//**
@@ -122,7 +122,7 @@ uint32_t I2C_Read(uint32_t i2cAddr,
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x002);
 	// Enable iic
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x001);
-	msleep(1);
+	usleep(1);
 
 	if(regAddr != -1)
 	{
@@ -163,7 +163,7 @@ uint32_t I2C_Read(uint32_t i2cAddr,
 		rxCnt++;
 	}
 
-	msleep(1);
+	usleep(1);
 
 	return rxCnt;
 }
@@ -188,7 +188,7 @@ uint32_t I2C_Write(uint32_t i2cAddr,
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x002);
 	// enable iic
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x001);
-	msleep(1);
+	usleep(1);
 
 	// Set the I2C address
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + TX_FIFO), (0x100 | (i2cAddr << 1)));
@@ -207,7 +207,7 @@ uint32_t I2C_Write(uint32_t i2cAddr,
 		while (((Xil_In32(XPAR_AXI_IIC_0_BASEADDR + SR) & 0x80) == 0x00) && (--timeout));
 		txCnt++;
 	}
-	msleep(1);
+	usleep(1);
 
 	return (timeout ? txCnt : 0);
 }
