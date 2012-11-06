@@ -250,6 +250,11 @@ int32_t XCOMM_SetAdcUserTestPattern(uint8_t* pattern);
 /*  ** if error,return -1 */
 int32_t XCOMM_CalibrateAdcDco(void);
 
+/** Checks if the ADC DCO is locked */
+/*  ** if the DCO is locked returns 1 */
+/*  ** if the DCO is not locked returns 0 */
+int32_t XCOMM_IsAdcDcoLocked(void);
+
 /************************ DAC Functions *****************************/
 
 /** Sets the sampling rate of the DAC */

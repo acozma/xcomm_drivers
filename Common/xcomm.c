@@ -109,11 +109,12 @@ struct stXCOMM_State
 ******************************************************************************/
 int32_t XCOMM_Init(XCOMM_DefaultInit* pDefInit)
 {
-    int ret = 0;
+    int32_t ret = 0;
+    int64_t retFreq = 0;
 
     /* Reset the XCOMM state variables */
-    int i = 0;
-    char* pData = (char*)&XCOMM_State;
+    int32_t i = 0;
+    int8_t* pData = (int8_t*)&XCOMM_State;
     for(i = 0; i < sizeof(XCOMM_State); i++)
     {
         pData[i] = 0;
@@ -133,27 +134,27 @@ int32_t XCOMM_Init(XCOMM_DefaultInit* pDefInit)
     ret = ad9523_setup();
     if(ret < 0)
         return -1;
-	ret = (int32_t)XCOMM_SetAdcSamplingRate(pDefInit->adcSamplingRate);
-	if(ret < 0)
+    retFreq = XCOMM_SetAdcSamplingRate(pDefInit->adcSamplingRate);
+	if(retFreq < 0)
         return -1;
-	ret = (int32_t)XCOMM_SetDacSamplingRate(pDefInit->dacSamplingRate);
-	if(ret < 0)
+	retFreq = XCOMM_SetDacSamplingRate(pDefInit->dacSamplingRate);
+	if(retFreq < 0)
         return -1;
 	
 	/* Initialize the Rx ADF4351 */
     ret = adf4351_setup(ADF4351_RX_CHANNEL);
     if(ret < 0)
         return -1;
-	ret = (int32_t)XCOMM_SetRxFrequency(pDefInit->rxFrequency);
-	if(ret < 0)
+    retFreq = XCOMM_SetRxFrequency(pDefInit->rxFrequency);
+	if(retFreq < 0)
         return -1;
 
 	/* Initialize the Tx ADF4351 */
     ret = adf4351_setup(ADF4351_TX_CHANNEL);
     if(ret < 0)
         return -1;
-	ret = (int32_t)XCOMM_SetTxFrequency(pDefInit->txFrequency);
-	if(ret < 0)
+    retFreq = XCOMM_SetTxFrequency(pDefInit->txFrequency);
+	if(retFreq < 0)
         return -1;
     
 	/* Initialize the AD9122 */
@@ -794,6 +795,16 @@ int32_t XCOMM_CalibrateAdcDco(void)
 	return ret;
 }
 
+/**************************************************************************//**
+* @brief Checks if the ADC DCO is locked
+*
+* @return If the DCO is locked returns 1
+* 		  if the DCO is not locked returns 0
+******************************************************************************/
+int32_t XCOMM_IsAdcDcoLocked(void)
+{
+	return ad9643_is_dco_locked();
+}
 
 /************************ DAC Functions **************************************/
 

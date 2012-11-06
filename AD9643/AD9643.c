@@ -47,7 +47,7 @@
 #include "adc_core.h"
 #include "AD9643.h"
 
-extern void msleep(uint32_t ms_count);
+extern void usleep(uint32_t us_count);
 
 /**************************************************************************//**
 * @brief Writes data into a register
@@ -154,7 +154,7 @@ int32_t ad9643_dco_calibrate_2c()
 		cnt = 4;
 
 		do {
-			//msleep(8);
+			usleep(8);
             ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
 			if ((cnt-- < 0) | (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
 				ADC_CORE_ADC_STAT_PN_ERR1))) {
@@ -168,7 +168,7 @@ int32_t ad9643_dco_calibrate_2c()
 
 		if (!ret)
 			do {
-				//msleep(4);
+				usleep(4);
                 ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
 				if (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
 					        ADC_CORE_ADC_STAT_PN_ERR1)) {
@@ -211,6 +211,52 @@ int32_t ad9643_dco_calibrate_2c()
 	ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
 
 	return ret;
+}
+
+/***************************************************************************//**
+ * @brief Checks if the DCO is locked
+ *
+ * @return Returns 1 if the DCO is locked, 0 otherwise.
+*******************************************************************************/
+int32_t ad9643_is_dco_locked()
+{
+	int32_t ret = 0, cnt;
+	uint32_t stat;
+
+	ad9643_testmode_set(0x2, AD9643_TEST_MODE_PN23_SEQ);
+	ad9643_testmode_set(0x1, AD9643_TEST_MODE_PN9_SEQ);
+
+    ADC_Core_Write(ADC_CORE_PN_ERR_CTRL, ADC_CORE_PN23_1_EN | ADC_CORE_PN9_0_EN);
+
+    ADC_Core_Write(ADC_CORE_ADC_STAT, ADC_CORE_ADC_STAT_MASK);
+
+    cnt = 4;
+    do {
+		usleep(8);
+		ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
+		if ((cnt-- < 0) | (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
+			ADC_CORE_ADC_STAT_PN_ERR1))) {
+			ret = -1;
+			break;
+		}
+	} while (stat & (ADC_CORE_ADC_STAT_PN_OOS0 |
+					 ADC_CORE_ADC_STAT_PN_OOS1));
+
+	cnt = 4;
+	if (!ret)
+	do {
+		usleep(4);
+		ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
+		if (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
+					ADC_CORE_ADC_STAT_PN_ERR1)) {
+			ret = -1;
+			break;
+		}
+	} while (cnt--);
+
+	ad9643_testmode_set(0x3, AD9643_TEST_MODE_OFF);
+
+	return ret ? 0 : 1;
 }
 
 /***************************************************************************//**
