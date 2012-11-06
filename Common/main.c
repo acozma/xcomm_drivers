@@ -96,15 +96,15 @@ int main()
     dac_test(IICSEL_B0LPC);
     xil_printf("DAC test complete.\n\r");
 
-	xil_printf("\n\rSetting the VGA gain to: %d.%d dB\n\r", (int)gain, (int)((gain - (int)gain) * 100));
+	xil_printf("\n\rSetting the VGA gain to: %d.%d dB\n\r", (int)defInit.rxGain1000/1000, (int)((defInit.rxGain1000 - (int)(defInit.rxGain1000/1000)*1000)));
 	retGain = (float)XCOMM_SetRxGain(defInit.rxGain1000) / 1000.0f;
-	xil_printf("Actual set VGA gain: %d.%d dB\n\r", (int)retGain, (int)((retGain - (int)retGain) * 100));
+	xil_printf("Actual set VGA gain: %d.%d dB\n\r", (int)retGain, (int)((retGain - (int)retGain) * 1000));
 
-	xil_printf("\n\rSetting the Rx frequency to: %lld%06lld\n\r", freqRx/(uint64_t)1e6, freqRx%(uint64_t)1e6);
+	xil_printf("\n\rSetting the Rx frequency to: %lld%06lld\n\r", defInit.rxFrequency/(uint64_t)1e6, defInit.rxFrequency%(uint64_t)1e6);
     retFreqRx = XCOMM_SetRxFrequency(defInit.rxFrequency);
     xil_printf("Actual set Rx frequency: %lld%06lld\n\r", retFreqRx/(uint64_t)1e6, retFreqRx%(uint64_t)1e6);
 
-	xil_printf("\n\rSetting the Tx frequency to: %lld%06lld\n\r", freqTx/(uint64_t)1e6, freqTx%(uint64_t)1e6);
+	xil_printf("\n\rSetting the Tx frequency to: %lld%06lld\n\r", defInit.txFrequency/(uint64_t)1e6, defInit.txFrequency%(uint64_t)1e6);
     retFreqTx = XCOMM_SetTxFrequency(defInit.txFrequency);
     xil_printf("Actual set Tx frequency: %lld%06lld\n\r", retFreqTx/(uint64_t)1e6, retFreqTx%(uint64_t)1e6);
 
