@@ -132,12 +132,13 @@ int32_t ad9643_testmode_set(uint32_t chan_mask, uint32_t mode)
 /***************************************************************************//**
  * @brief Calibrates the DCO clock delay
  *
- * @return Negative error code or 0 in case of success.
+ * @return Negative error code or DCO clock delay code in case of success.
 *******************************************************************************/
 int32_t ad9643_dco_calibrate_2c()
 {
 	int32_t dco, ret, cnt, start, max_start, max_cnt;
 	uint32_t stat;
+	uint32_t regVal;
 	uint8_t err_field[33];
 
 	ad9643_testmode_set(0x2, AD9643_TEST_MODE_PN23_SEQ);
@@ -204,13 +205,13 @@ int32_t ad9643_dco_calibrate_2c()
 	}
 
 	dco = max_start + (max_cnt / 2);
+	regVal = dco > 0 ? ((dco - 1) | 0x80) : 0;
 
 	ad9643_testmode_set(0x3, AD9643_TEST_MODE_OFF);
-	ad9643_write(AD9643_REG_DCO_OUTPUT_DELAY,
-		         dco > 0 ? ((dco - 1) | 0x80) : 0);
+	ad9643_write(AD9643_REG_DCO_OUTPUT_DELAY,regVal);
 	ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
 
-	return ret;
+	return ret < 0 ? -1 : (regVal & 0x1F);
 }
 
 /***************************************************************************//**
@@ -256,7 +257,7 @@ int32_t ad9643_is_dco_locked()
 
 	ad9643_testmode_set(0x3, AD9643_TEST_MODE_OFF);
 
-	return ret ? 0 : 1;
+	return ret < 0 ? 0 : 1;
 }
 
 /***************************************************************************//**
@@ -276,8 +277,9 @@ int32_t ad9643_setup()
 	ad9643_write(AD9643_REG_OUTPUT_MODE, AD9643_OUTPUT_MODE_DEF | AD9643_OUTPUT_MODE_TWOS_COMPLEMENT);
 	ad9643_write(AD9643_REG_TEST_MODE, AD9643_TEST_MODE_OFF);
 	ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+
 	ret = ad9643_dco_calibrate_2c();
-	if(ret)
+	if(ret < 0)
 	{
 		ad9643_dco_clock_invert(1);
 		ret = ad9643_dco_calibrate_2c();
@@ -285,7 +287,7 @@ int32_t ad9643_setup()
 
     ADC_Core_Write(ADC_CORE_DMA_CHAN_SEL,0x02);
 
-	return ret;
+	return ret < 0 ? -1 : 0;
 }
 
 /***************************************************************************//**
