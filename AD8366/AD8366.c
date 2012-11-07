@@ -164,7 +164,7 @@ static int32_t ad8366_write_raw(int32_t channel,
 
 	code = (val1000 - 4500) / 253;
 
-    if((val1000 - 4500 + code*253) > (4500 + (code+1)*253 - val1000))
+    if((val1000 - (4500 + code*253)) > ((4500 + (code+1)*253) - val1000))
     {
         code++;
     }
