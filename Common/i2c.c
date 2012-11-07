@@ -47,6 +47,7 @@
 #include "i2c.h"
 #include "xparameters.h"
 #include "xil_io.h"
+#include "timer.h"
 
 /*****************************************************************************/
 /******************* I2C Registers Definitions *******************************/
@@ -67,8 +68,9 @@
 #define GPO			 0x124
 
 /*****************************************************************************/
-/************************ Variables Definitions ******************************/
+/************************ Variables/Constants Definitions ********************/
 /*****************************************************************************/
+#define I2C_DELAY	 200 //delay in us between I2C operations
 
 /**************************************************************************//**
 * @brief Delays the program execution with the specified number of us.
@@ -78,8 +80,7 @@
 ******************************************************************************/
 void usleep(uint32_t us_count)
 {
-	uint32_t count;
-	for (count = 0; count < ((us_count * 1000) + 1); count++);
+	TIMER0_WAIT(XPAR_AXI_TIMER_0_BASEADDR, us_count*1000);
 }
 
 /**************************************************************************//**
@@ -122,7 +123,7 @@ uint32_t I2C_Read(uint32_t i2cAddr,
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x002);
 	// Enable iic
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x001);
-	usleep(1);
+	usleep(I2C_DELAY);
 
 	if(regAddr != -1)
 	{
@@ -163,7 +164,7 @@ uint32_t I2C_Read(uint32_t i2cAddr,
 		rxCnt++;
 	}
 
-	usleep(1);
+	usleep(I2C_DELAY);
 
 	return rxCnt;
 }
@@ -188,7 +189,7 @@ uint32_t I2C_Write(uint32_t i2cAddr,
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x002);
 	// enable iic
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x001);
-	usleep(1);
+	usleep(I2C_DELAY);
 
 	// Set the I2C address
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + TX_FIFO), (0x100 | (i2cAddr << 1)));
@@ -207,7 +208,7 @@ uint32_t I2C_Write(uint32_t i2cAddr,
 		while (((Xil_In32(XPAR_AXI_IIC_0_BASEADDR + SR) & 0x80) == 0x00) && (--timeout));
 		txCnt++;
 	}
-	usleep(1);
+	usleep(I2C_DELAY);
 
 	return (timeout ? txCnt : 0);
 }

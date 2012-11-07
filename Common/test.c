@@ -47,6 +47,7 @@
 #include <stdint.h>
 #include <xparameters.h>
 #include <xil_io.h>
+#include "timer.h"
 #include "test.h"
 
 /*****************************************************************************/
@@ -64,8 +65,7 @@ extern void xil_printf(const char *ctrl1, ...);
 ******************************************************************************/
 void delay_ms(uint32_t ms_count)
 {
-	uint32_t count;
-	for (count = 0; count < ((ms_count * 100000) + 1); count++);
+	TIMER0_WAIT(XPAR_AXI_TIMER_0_BASEADDR, ms_count*1000000);
 }
 
 /**************************************************************************//**
