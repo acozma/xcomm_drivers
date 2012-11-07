@@ -109,8 +109,6 @@ struct stXCOMM_State
 ******************************************************************************/
 int32_t XCOMM_Init(XCOMM_DefaultInit* pDefInit)
 {
-    int32_t ret = 0;
-    int64_t retFreq = 0;
 
     /* Reset the XCOMM state variables */
     int32_t i = 0;
@@ -121,66 +119,57 @@ int32_t XCOMM_Init(XCOMM_DefaultInit* pDefInit)
     }
 
     /* Initialize the SPI communication */
-    ret = SPI_Init();
-    if(ret < 0)
+    if(SPI_Init() < 0)
     	return -1;
 
     /* Initialize the AD9548 */
-    ret = ad9548_setup();
-    if(ret < 0)
+    if(ad9548_setup() < 0)
         return -1;
 
 	/* Initialize the AD9523 */
-    ret = ad9523_setup();
-    if(ret < 0)
+    if(ad9523_setup() < 0)
         return -1;
-    retFreq = XCOMM_SetAdcSamplingRate(pDefInit->adcSamplingRate);
-	if(retFreq < 0)
+
+    if(XCOMM_SetAdcSamplingRate(pDefInit->adcSamplingRate) < 0)
         return -1;
-	retFreq = XCOMM_SetDacSamplingRate(pDefInit->dacSamplingRate);
-	if(retFreq < 0)
+
+    if(XCOMM_SetDacSamplingRate(pDefInit->dacSamplingRate) < 0)
         return -1;
 	
 	/* Initialize the Rx ADF4351 */
-    ret = adf4351_setup(ADF4351_RX_CHANNEL);
-    if(ret < 0)
+    if(adf4351_setup(ADF4351_RX_CHANNEL) < 0)
         return -1;
-    retFreq = XCOMM_SetRxFrequency(pDefInit->rxFrequency);
-	if(retFreq < 0)
+
+    if(XCOMM_SetRxFrequency(pDefInit->rxFrequency) < 0)
         return -1;
 
 	/* Initialize the Tx ADF4351 */
-    ret = adf4351_setup(ADF4351_TX_CHANNEL);
-    if(ret < 0)
+    if(adf4351_setup(ADF4351_TX_CHANNEL) < 0)
         return -1;
-    retFreq = XCOMM_SetTxFrequency(pDefInit->txFrequency);
-	if(retFreq < 0)
+
+    if(XCOMM_SetTxFrequency(pDefInit->txFrequency) < 0)
         return -1;
     
 	/* Initialize the AD9122 */
-    ret = ad9122_setup();
-    if(ret < 0)
+    if(ad9122_setup() < 0)
         return -1;
 
 	/* Initialize the AD9643 */
-    ret = ad9643_setup();
-    if(ret < 0)
+    if(ad9643_setup() < 0)
         return -1;
 
 	/* Initialize the AD8366 */
-    ret = ad8366_setup();
-    if(ret < 0)
+    if(ad8366_setup() < 0)
         return -1;
-	ret = XCOMM_SetRxGain(pDefInit->rxGain1000);
-	if(ret < 0)
+
+    if(XCOMM_SetRxGain(pDefInit->rxGain1000) < 0)
         return -1;
 
     /* Read the calibration data from the EEPROM */
-    ret = EEPROM_GetCalData((uint8_t*)XCOMM_calData, &XCOMM_calDataSize);
-    if(ret < 0)
+    if(EEPROM_GetCalData((uint8_t*)XCOMM_calData, &XCOMM_calDataSize) < 0)
         return -1;
 
-    return ret;
+    return 0;
 }
 
 /**************************************************************************//**
@@ -773,7 +762,7 @@ int32_t XCOMM_SetAdcUserTestPattern(uint8_t* pattern)
 /**************************************************************************//**
 * @brief Calibrates the ADC DCO clock delay 
 * 
-* @return If success, returns 0 
+* @return If success, returns DCO clock delay code
 *		  if error,return -1
 ******************************************************************************/
 int32_t XCOMM_CalibrateAdcDco(void)
@@ -784,7 +773,8 @@ int32_t XCOMM_CalibrateAdcDco(void)
 
 	ad9643_dco_clock_invert(0);
 	ret = ad9643_dco_calibrate_2c();
-	if(ret)
+
+	if(ret<0)
 	{
 		ad9643_dco_clock_invert(1);
 		ret = ad9643_dco_calibrate_2c();

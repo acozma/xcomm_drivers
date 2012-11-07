@@ -246,7 +246,7 @@ XCOMM_AdcTestMode XCOMM_GetAdcTestMode(XCOMM_ReadMode readMode);
 int32_t XCOMM_SetAdcUserTestPattern(uint8_t* pattern);
 
 /** Calibrates the ADC DCO clock delay */
-/*  ** if success, returns 0 */
+/*  ** if success, returns DCO clock delay code */
 /*  ** if error,return -1 */
 int32_t XCOMM_CalibrateAdcDco(void);
 
