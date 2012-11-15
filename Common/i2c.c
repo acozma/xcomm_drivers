@@ -71,6 +71,7 @@
 /************************ Variables/Constants Definitions ********************/
 /*****************************************************************************/
 #define I2C_DELAY	 200 //delay in us between I2C operations
+#define I2C_TIMEOUT	 0xFFFFFF 	//timeout for I2C operations
 
 /**************************************************************************//**
 * @brief Delays the program execution with the specified number of us.
@@ -117,7 +118,7 @@ uint32_t I2C_Read(uint32_t i2cAddr,
                   uint32_t regAddr, uint32_t rxSize, uint8_t* rxBuf)
 {
 	uint32_t rxCnt = 0;
-	uint32_t timeout = 0xFFFFFF;
+	uint32_t timeout = I2C_TIMEOUT;
 
 	// Reset tx fifo
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x002);
@@ -155,7 +156,7 @@ uint32_t I2C_Read(uint32_t i2cAddr,
 			Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x01);			
 			return rxCnt;
 		}
-		timeout = 0xFFFFFF;
+		timeout = I2C_TIMEOUT;
 
 		//read the data
 		rxBuf[rxCnt] = Xil_In32(XPAR_AXI_IIC_0_BASEADDR + RX_FIFO) & 0xFFFF;
@@ -183,7 +184,7 @@ uint32_t I2C_Write(uint32_t i2cAddr,
                    uint32_t regAddr, uint32_t txSize, uint8_t* txBuf)
 {
 	uint32_t txCnt = 0;
-	uint32_t timeout = 0xFFFFFF;
+	uint32_t timeout = I2C_TIMEOUT;
 
 	// Reset tx fifo
 	Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + CR), 0x002);
@@ -202,7 +203,7 @@ uint32_t I2C_Write(uint32_t i2cAddr,
 	// Write data to the I2C slave
 	while((txCnt < txSize) && (timeout))
 	{
-		timeout = 0xFFFFFF;
+		timeout = I2C_TIMEOUT;
 		// put the Tx data into the Tx FIFO
 		Xil_Out32((XPAR_AXI_IIC_0_BASEADDR + TX_FIFO), (txCnt == txSize - 1) ? (0x200 | txBuf[txCnt]) : txBuf[txCnt]);
 		while (((Xil_In32(XPAR_AXI_IIC_0_BASEADDR + SR) & 0x80) == 0x00) && (--timeout));
