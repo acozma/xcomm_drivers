@@ -59,7 +59,19 @@ extern void usleep(uint32_t us_count);
 ******************************************************************************/
 int32_t ad9643_write(uint32_t regAddr, uint32_t regVal)
 {
-    return SPI_Write(SPI_SEL_AD9643, regAddr, regVal);
+	int32_t ret;
+
+	if(regAddr == AD9643_REG_TRANSFER && regVal)
+	{
+		ret = SPI_Write(SPI_SEL_AD9643, regAddr, regVal);
+		ret = SPI_Write(SPI_SEL_AD9643, regAddr, 0);
+	}
+	else
+	{
+		ret = SPI_Write(SPI_SEL_AD9643, regAddr, regVal);
+	}
+
+	return ret;
 }
 
 /**************************************************************************//**
