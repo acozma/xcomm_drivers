@@ -82,12 +82,12 @@ int main()
 
     xil_printf("\n\rTesting the ADC communication... \n\r");
     
-    XCOMM_SetAdcTestMode(0x01);
+    XCOMM_SetAdcTestMode(0x01, XCOMM_AdcChannel_All);
     adc_capture(IICSEL_B0LPC, 1024, DDR_BASEADDR);
 
 	for (mode = 0x1; mode <= 0x7; mode++)
 	{
-		XCOMM_SetAdcTestMode(mode);
+		XCOMM_SetAdcTestMode(mode, XCOMM_AdcChannel_All);
 		adc_test(IICSEL_B0LPC, mode, 0x1);
 	}
     xil_printf("ADC test complete.\n\r");
@@ -113,7 +113,7 @@ int main()
     xil_printf("DDS setup complete.\n\r");
 
     xil_printf("\n\rReading data from air... \n\r");
-    XCOMM_SetAdcTestMode(XCOMM_AdcTestMode_Off);
+    XCOMM_SetAdcTestMode(XCOMM_AdcTestMode_Off, XCOMM_AdcChannel_All);
     while(1)
     {
     	adc_capture(IICSEL_B0LPC, 1024, DDR_BASEADDR);

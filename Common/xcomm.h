@@ -68,6 +68,14 @@ XCOMM_AdcTestMode_UserMode                = 0x08,
 XCOMM_AdcTestMode_Ramp                    = 0x0F,
 }XCOMM_AdcTestMode;
 
+/** ADC Channels */
+typedef enum
+{
+XCOMM_AdcChannel_A		= 0x01,
+XCOMM_AdcChannel_B		= 0x02,
+XCOMM_AdcChannel_All	= 0x03
+}XCOMM_AdcChannel;
+
 /** Read Modes Definitions */
 typedef enum
 {
@@ -229,9 +237,10 @@ int64_t XCOMM_GetAdcSamplingRate(XCOMM_ReadMode);
 
 /** Sets the test mode of the ADC */
 /*  ** testMode: desired ADC test mode */
+/*  ** channel: ADC channel to set the test mode for */
 /*  ** if success, return new ADC test mode if success */
 /*  ** if error, return -1 */
-XCOMM_AdcTestMode XCOMM_SetAdcTestMode(XCOMM_AdcTestMode testMode);
+XCOMM_AdcTestMode XCOMM_SetAdcTestMode(XCOMM_AdcTestMode testMode, XCOMM_AdcChannel channel);
 
 /** Gets the test mode of the ADC */
 /*  ** readMode: read ADC test mode from driver or HW */

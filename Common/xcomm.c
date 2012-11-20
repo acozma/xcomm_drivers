@@ -701,12 +701,14 @@ int64_t XCOMM_GetAdcSamplingRate(XCOMM_ReadMode readMode)
 *
 * @param testMode - desired ADC test mode
 *
+* @param channel - ADC channel to set the test mode for
+*
 * @return If success, return new ADC test mode if success
 *         if error, return -1
 ******************************************************************************/
-XCOMM_AdcTestMode XCOMM_SetAdcTestMode(XCOMM_AdcTestMode testMode)
+XCOMM_AdcTestMode XCOMM_SetAdcTestMode(XCOMM_AdcTestMode testMode, XCOMM_AdcChannel channel)
 {
-    int32_t mode = ad9643_test_mode(testMode);
+    int32_t mode = ad9643_test_mode(testMode, channel);
 
     if(mode < 0)
         return (XCOMM_AdcTestMode)-1;
@@ -731,7 +733,7 @@ XCOMM_AdcTestMode XCOMM_GetAdcTestMode(XCOMM_ReadMode readMode)
 
     if(readMode == XCOMM_ReadMode_FromHW)
     {
-        mode = ad9643_test_mode(XCOMM_AdcTestMode_Ramp + 1);
+        mode = ad9643_test_mode(XCOMM_AdcTestMode_Ramp + 1, XCOMM_AdcChannel_All);
         if(mode < 0)
             return (XCOMM_AdcTestMode)-1;
 

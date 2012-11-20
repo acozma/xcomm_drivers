@@ -130,7 +130,7 @@ int32_t ad9643_testmode_set(uint32_t chan_mask, uint32_t mode)
 	if(ret < 0)
 		return ret;
 
-	ret = ad9643_write(AD9643_REG_CHANNEL_IDX, 0x3);
+	ret = ad9643_write(AD9643_REG_CHANNEL_IDX, AD9643_CHANNEL_IDX_ADC_AB);
 	if(ret < 0)
 		return ret;
 
@@ -932,18 +932,28 @@ int32_t ad9643_input_span(int32_t span)
  * @param mode - ADC test mode 
  *             - for valid values see the Test Modes Definitions in AD9643.h
  *
+ * @param chan_mask - ADC channel to set the test mode for
+ *
  * @return Returns the set test mode or negative error code
 *******************************************************************************/
-int32_t ad9643_test_mode(int32_t mode)
+int32_t ad9643_test_mode(int32_t mode, int32_t chan_mask)
 {
     int32_t ret;
 	
 	if(mode >= AD9643_TEST_MODE_OFF && mode <= AD9643_TEST_MODE_RAMP)
     {
+		ret = ad9643_write(AD9643_REG_CHANNEL_IDX, chan_mask);
+		if(ret < 0)
+			return ret;
+
         ret = ad9643_write(AD9643_REG_TEST_MODE, mode);
 		if(ret < 0)
             return ret;
 			
+		ret = ad9643_write(AD9643_REG_CHANNEL_IDX, AD9643_CHANNEL_IDX_ADC_AB);
+		if(ret < 0)
+			return ret;
+
         ret = ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
 		if(ret < 0)
             return ret;

@@ -93,6 +93,7 @@
 /* CHANNEL_IDX  Bit Definitions */
 #define AD9643_CHANNEL_IDX_ADC_A        (1 << 0)
 #define AD9643_CHANNEL_IDX_ADC_B        (1 << 1)
+#define AD9643_CHANNEL_IDX_ADC_AB      	(0x03)
 
 /* REG_TRANSFER Bit Definitions */
 #define AD9643_TRANSFER_EN              (1 << 0)
@@ -198,7 +199,7 @@ int32_t ad9643_dco_output_clock_delay(int32_t delay);
 /** Configures the full-scale input voltage selection. Returns the set input voltage selection. */
 int32_t ad9643_input_span(int32_t span);
 /** Sets the ADC's test mode. Returns the set test mode. */
-int32_t ad9643_test_mode(int32_t mode);
+int32_t ad9643_test_mode(int32_t mode, int32_t chan_mask);
 /** Sets the ADC's user test pattern. */
 int32_t ad9643_user_test_pattern(uint8_t* pattern);
 /** Calibrates the DCO clock delay. */
