@@ -84,14 +84,6 @@ static const stDevConfig devConfig[] =
         SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_AD9523)
     },
-    /* ADF4351_TX */
-    {
-        0, 32, 
-        (SPI_4_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
-        SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
-        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
-        (1 << SPI_SEL_ADF4351_TX)
-    },
     /* ADF4351_RX */
     {
         0, 32, 
@@ -99,6 +91,14 @@ static const stDevConfig devConfig[] =
         SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
         SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
         (1 << SPI_SEL_ADF4351_RX)
+    },
+    /* ADF4351_TX */
+    {
+        0, 32, 
+        (SPI_4_WIRE_MODE | SPI_CS_LOW_AT_TRANFER_END | 
+        SPI_SAMPLE_AT_CLK_MIDDLE | SPI_TX_ON_CLK_FALL |
+        SPI_CLK_IDLE_LOW | SPI_CLK_FOSC_DIV_4),
+        (1 << SPI_SEL_ADF4351_TX)
     },
     /* AD8366_TX */
     {
@@ -195,6 +195,39 @@ uint32_t PIC_Read(uint32_t spiSel, uint8_t size, uint32_t* data)
     }
 
     return rSize;
+}
+
+/**************************************************************************//**
+* @brief Reads the PIC firmware version
+*
+* @return Returns the PIC firmware version number or -1 in case of error
+******************************************************************************/
+int32_t PIC_ReadFwVersion()
+{
+	int32_t i;
+	int32_t ret;
+	uint8_t wrBuf[1] = {REV_READ};
+	uint8_t rdBuf[PIC_FW_REV_LEN];
+
+	ret = I2C_Write(IICSEL_PIC, -1, 1, wrBuf);
+	if(ret == 0)
+		return -1;
+
+	ret = I2C_Read(IICSEL_PIC, -1, PIC_FW_REV_LEN, rdBuf);
+	if(ret != PIC_FW_REV_LEN)
+		return -1;
+
+	for(i = 0; i < PIC_FW_REV_LEN - 1; i++)
+	{
+		if(rdBuf[i] == 'F' && rdBuf[i+1] == 'W')
+			break;
+	}
+	if(i < PIC_FW_REV_LEN - 5)
+		ret = (rdBuf[i+2] - 0x30)*100 + (rdBuf[i+3] - 0x30)*10 + (rdBuf[i+4] - 0x30)*1;
+	else
+		ret = -1;
+
+	return ret;
 }
 
 /**************************************************************************//**

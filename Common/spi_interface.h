@@ -77,8 +77,12 @@ typedef struct _stDevConfig
 #define SPI_SEL_AD8366       0x06
 
 /* PIC control words*/
+#define REV_READ  	0x01
 #define CTRL_WRITE  0x03
 #define DATA_WRITE  0x04
+
+/* PIC Firmware Revision Size */
+#define PIC_FW_REV_LEN	32
 
 /* SPI configuration options */
 #define SPI_RX_TRANSFER_CNT(x)      ((x) << 10)
@@ -100,6 +104,8 @@ typedef struct _stDevConfig
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
 /*****************************************************************************/
+/** Reads the PIC firmware version */
+int32_t PIC_ReadFwVersion();
 /** Initializes the communication with the PIC */
 int32_t SPI_Init(); 
 /** Reads data from the selected device */
