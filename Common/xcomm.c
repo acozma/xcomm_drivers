@@ -314,6 +314,16 @@ XCOMM_Version XCOMM_GetBoardVersion(XCOMM_ReadMode readMode)
     return ver;
 }
 
+/**************************************************************************//**
+* @brief Gets the PIC firmware version
+*
+* @return If success, returns the PIC firmware version number - 0 to 100
+*		  If error returns -1
+******************************************************************************/
+int32_t XCOMM_GetPicFwVersion()
+{
+	return PIC_ReadFwVersion();
+}
 
 /************************ Rx Functions ***************************************/
 
@@ -780,6 +790,11 @@ int32_t XCOMM_CalibrateAdcDco(void)
 	{
 		ad9643_dco_clock_invert(1);
 		ret = ad9643_dco_calibrate_2c();
+                if (!(ret<0))
+                {
+                    ret |= 0x0100;
+                }
+
 	}
 
 	ADC_Core_Write(ADC_CORE_DMA_CHAN_SEL,0x02);

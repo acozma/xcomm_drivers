@@ -61,5 +61,7 @@ uint32_t I2C_Read(uint32_t i2cAddr, uint32_t regAddr,
 /** Writes data to an I2C slave. */
 uint32_t I2C_Write(uint32_t i2cAddr, uint32_t regAddr, 
                    uint32_t txSize, uint8_t* txBuf); 
+/** Delay in us*/
+void delay_us(uint32_t us_count);
 
 #endif /* __I2C_H__ */

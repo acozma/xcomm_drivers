@@ -112,6 +112,7 @@ typedef struct
     int16_t     offsetQ; 
     int32_t     error;
 }XCOMM_RxIQCorrection;
+
 typedef XCOMM_TxIQCorrection XCOMM_DacIQCorrection;
 
 /** XCOMM Default Initialization Structure */
@@ -144,6 +145,10 @@ int32_t XCOMM_Sync(void);
 /*  ** if error, return version struct with error set to -1 */
 XCOMM_Version XCOMM_GetBoardVersion(XCOMM_ReadMode readMode);
 
+/** Gets the PIC firmware version*/
+/*  ** if success, returns the PIC firmware version number - 0 to 100 */
+/*  ** if error returns -1 */
+int32_t XCOMM_GetPicFwVersion();
 
 /************************ Rx Functions *****************************/
 

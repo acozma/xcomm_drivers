@@ -47,7 +47,7 @@
 #include "adc_core.h"
 #include "AD9643.h"
 
-extern void usleep(uint32_t us_count);
+extern void delay_us(uint32_t us_count);
 
 /**************************************************************************//**
 * @brief Writes data into a register
@@ -160,49 +160,40 @@ int32_t ad9643_dco_calibrate_2c()
 
 	for(dco = 0; dco <= 32; dco++)
     {
-		ret = 0;
+		ret = -1;
 		ad9643_write(AD9643_REG_DCO_OUTPUT_DELAY, dco > 0 ? ((dco - 1) | 0x80) : 0);
 		ad9643_write(AD9643_REG_TRANSFER, AD9643_TRANSFER_EN);
+        ad9643_read(AD9643_REG_DCO_OUTPUT_DELAY);
+
         ADC_Core_Write(ADC_CORE_ADC_STAT, ADC_CORE_ADC_STAT_MASK);
-		cnt = 4;
 
-		do {
-			usleep(100);
-            ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
-			if ((cnt-- < 0) | (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
-				ADC_CORE_ADC_STAT_PN_ERR1))) {
-				ret = -1;
-				break;
-			}
-		} while (stat & (ADC_CORE_ADC_STAT_PN_OOS0 |
-			             ADC_CORE_ADC_STAT_PN_OOS1));
+		delay_us(1000);
 
-		cnt = 4;
+        ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
 
-		if (!ret)
-			do {
-				usleep(50);
-                ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
-				if (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
-					        ADC_CORE_ADC_STAT_PN_ERR1)) {
-					ret = -1;
-					break;
-				}
-			} while (cnt--);
+        if(!( stat & 0x3c))
+        {
+                ret = 0;
+		}
 
 		err_field[dco] = !!ret;
 	}
 
 	ret = -1;
 	for(dco = 0, cnt = 0, max_cnt = 0, start = -1, max_start = 0;
-		dco <= 32; dco++) {
-		if (err_field[dco] == 0) {
+		dco <= 32; dco++) 
+    {
+		if (err_field[dco] == 0) 
+        {
 			if (start == -1)
 				start = dco;
 			cnt++;
 			ret = 0;
-		} else {
-			if (cnt > max_cnt) {
+		} 
+        else 
+        {
+			if (cnt > max_cnt) 
+            {
 				max_cnt = cnt;
 				max_start = start;
 			}
@@ -211,7 +202,8 @@ int32_t ad9643_dco_calibrate_2c()
 		}
 	}
 
-	if (cnt > max_cnt) {
+	if (cnt > max_cnt) 
+    {
 		max_cnt = cnt;
 		max_start = start;
 	}
@@ -233,39 +225,25 @@ int32_t ad9643_dco_calibrate_2c()
 *******************************************************************************/
 int32_t ad9643_is_dco_locked()
 {
-	int32_t ret = 0, cnt;
+	int32_t ret = -1, cnt;
 	uint32_t stat;
 
 	ad9643_testmode_set(0x2, AD9643_TEST_MODE_PN23_SEQ);
 	ad9643_testmode_set(0x1, AD9643_TEST_MODE_PN9_SEQ);
-
     ADC_Core_Write(ADC_CORE_PN_ERR_CTRL, ADC_CORE_PN23_1_EN | ADC_CORE_PN9_0_EN);
+
+    ad9643_read(AD9643_REG_DCO_OUTPUT_DELAY);
 
     ADC_Core_Write(ADC_CORE_ADC_STAT, ADC_CORE_ADC_STAT_MASK);
 
-    cnt = 4;
-    do {
-		usleep(100);
-		ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
-		if ((cnt-- < 0) | (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
-			ADC_CORE_ADC_STAT_PN_ERR1))) {
-			ret = -1;
-			break;
-		}
-	} while (stat & (ADC_CORE_ADC_STAT_PN_OOS0 |
-					 ADC_CORE_ADC_STAT_PN_OOS1));
+    delay_us(1000);
 
-	cnt = 4;
-	if (!ret)
-	do {
-		usleep(50);
-		ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
-		if (stat & (ADC_CORE_ADC_STAT_PN_ERR0 |
-					ADC_CORE_ADC_STAT_PN_ERR1)) {
-			ret = -1;
-			break;
-		}
-	} while (cnt--);
+	ADC_Core_Read(ADC_CORE_ADC_STAT, &stat);
+
+    if(!( stat & 0x3c))
+    {
+        ret = 0;
+    }
 
 	ad9643_testmode_set(0x3, AD9643_TEST_MODE_OFF);
 
