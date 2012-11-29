@@ -225,7 +225,7 @@ int32_t PIC_ReadFwVersion()
 	if(i < PIC_FW_REV_LEN - 5)
 		ret = (rdBuf[i+2] - 0x30)*100 + (rdBuf[i+3] - 0x30)*10 + (rdBuf[i+4] - 0x30)*1;
 	else
-		ret = -1;
+		ret = 0;
 
 	return ret;
 }
